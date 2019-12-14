@@ -1,6 +1,12 @@
 @echo off
 
+setlocal enabledelayedexpansion
+
 set HOME=%HOMEDRIVE%%HOMEPATH%\TermTools
+
+:: remove existing entry from path (if any)
+set TMP=PATH:%HOME%;=
+call set "PATH=%%%TMP%%%"
 
 echo * Setting PATH entrys for TermTools (current user)
 
