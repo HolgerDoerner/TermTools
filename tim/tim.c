@@ -5,6 +5,7 @@
 #ifdef _MSC_VER
   #define _CRT_SECURE_NO_WARNINGS
   #define WIN32_LEAN_AND_MEAN
+  #define USE_LIBCMT
   #pragma comment(lib, "user32.lib")
   #pragma comment(lib, "advapi32.lib")
   #pragma comment(lib, "pdcurses.lib")
@@ -27,7 +28,7 @@
 
 #ifndef PDC_FORCE_UTF8
     #define PDC_FORCE_UTF8
-#endif // !PDC_FORCE_UTF8
+#endif // PDC_FORCE_UTF8
 
 #include <curses.h>
 
