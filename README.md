@@ -14,6 +14,7 @@ A collection of tools for the terminal written in C. They are first and foremost
 - **Visual Studio 2019** (16.2.4) or \
   **VC Build Tools 2019** (16.4.0)
 - PDCurses 3.9
+- GIT
 
 Lower versions (*should*) work, but are not testet.
 
