@@ -4,25 +4,43 @@ project(TermTools VERSION 0.1.0)
 include(CTest)
 enable_testing()
 
-option(PDCURSES_ROOT "test" C:/PDCurses)
+set(3RD_PARTY ${PROJECT_SOURCE_DIR}/3rd-party)
 
-# adding a custom target for building PDCurses.
-# also used of some tools as a dependency.
-add_custom_target("pdcurses_build")
-add_custom_command(TARGET "pdcurses_build"
-                    COMMENT "=== Building: PDCurses ==="
-                    WORKING_DIRECTORY ${PDCURSES_ROOT}/wincon
-                    COMMAND nmake -f Makefile.vc WIDE=Y UTF8=Y)
+include(ExternalProject)
+ExternalProject_Add(PDCurses 
+    GIT_REPOSITORY https://github.com/wmcbrine/PDCurses.git
+    PREFIX ${3RD_PARTY}
+    SOURCE_DIR ${3RD_PARTY}/PDCurses
+    TMP_DIR ${3RD_PARTY}/PDCurses_tmp
+    STAMP_DIR ${3RD_PARTY}/PDCurses_stamp
+    PATCH_COMMAND ""
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND cd ${3RD_PARTY}/PDCurses/wincon && nmake -f Makefile.vc WIDE=Y UTF8=Y
+    INSTALL_COMMAND ""
+    BUILD_IN_SOURCE 1
+)
 
 # adding a custom target for cleaning PDCurses.
-add_custom_target("pdcurses_clean")
-add_custom_command(TARGET "pdcurses_clean"
+add_custom_target("PDCurses_clean")
+add_custom_command(TARGET "PDCurses_clean"
                     COMMENT "=== Cleaning: PDCurses ==="
                     WORKING_DIRECTORY ${PDCURSES_ROOT}/wincon
-                    COMMAND nmake -f Makefile.vc clean)
+                    COMMAND cd ${3RD_PARTY}/PDCurses/wincon && nmake -f Makefile.vc clean)
 
+# targets
 add_subdirectory(tim)
 
-set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-include(CPack)
+install(TARGETS tim
+        CONFIGURATIONS Release)
+
+install(CODE "execute_process(COMMAND ${PROJECT_SOURCE_DIR}/etc/install.bat)"
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_STRIP_TRAILING_WHITESPACE)
+
+#if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX "c:/users/$ENV{USERNAME}/TermTools" CACHE PATH "..." FORCE)
+#endif()
+
+# set(CPACK_PROJECT_NAME ${PROJECT_NAME})
+# set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
+# include(CPack)

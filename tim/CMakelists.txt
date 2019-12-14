@@ -8,8 +8,8 @@ project(tim VERSION 0.1.0 LANGUAGES C)
 
 set(CURSES_NEED_CURSES TRUE)
 set(CURSES_NEED_WIDE TRUE)
-set(CURSES_LIBRARY ${PDCURSES_ROOT}/wincon/pdcurses.lib)
-set(CURSES_INCLUDE_PATH ${PDCURSES_ROOT})
+set(CURSES_LIBRARY ${3RD_PARTY}/PDCurses/wincon/pdcurses.lib)
+set(CURSES_INCLUDE_PATH ${3RD_PARTY}/PDCurses)
 
 find_package(Curses REQUIRED)
 include_directories(${CURSES_INCLUDE_DIRS})
@@ -19,4 +19,5 @@ set(EXECUTABLE_OUTPUT_PATH ../${PROJECT_NAME}/${CMAKE_BUILD_TYPE})
 add_executable(${PROJECT_NAME} tim.c)
 
 target_link_libraries(${PROJECT_NAME} ${CURSES_LIBRARIES})
-add_dependencies(${PROJECT_NAME} pdcurses_build)
+add_dependencies(${PROJECT_NAME} PDCurses)
+set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME ${PROJECT_NAME}.exe)
