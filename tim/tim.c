@@ -249,6 +249,8 @@ void help()
     _wprintf_p(L"    ARROW_DOWN, J  = scroll 1 line down\n");
     _wprintf_p(L"    PG_UP, l       = scroll 1 page up\n");
     _wprintf_p(L"    PG_DOWN, h     = scroll 1 page down\n");
+    _wprintf_p(L"    HOME           = jump to beginning of the input\n");
+    _wprintf_p(L"    END            = jump to end of the input\n");
     _wprintf_p(L"    ESC, CTRL+C    = exit\n");
     _wprintf_p(L"\n");
 }
