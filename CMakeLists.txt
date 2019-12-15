@@ -28,12 +28,12 @@ add_custom_command(TARGET "PDCurses_clean"
                     COMMAND cd ${3RD_PARTY}/PDCurses/wincon && nmake -f Makefile.vc clean)
 
 # targets
-add_subdirectory(tim)
+add_subdirectory(pager)
 
-install(TARGETS tim
+install(TARGETS pager
         CONFIGURATIONS Release)
 
-install(CODE "execute_process(COMMAND ${PROJECT_SOURCE_DIR}/etc/install.bat)"
+install(CODE "execute_process(COMMAND ${PROJECT_SOURCE_DIR}/etc/set_env.bat)"
         OUTPUT_STRIP_TRAILING_WHITESPACE
         ERROR_STRIP_TRAILING_WHITESPACE)
 

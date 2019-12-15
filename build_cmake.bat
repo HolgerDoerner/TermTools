@@ -1,21 +1,19 @@
 @echo off
 
-if [%1]==[] (
+if "%1"=="/?" (
     goto :usage
+)
+
+if [%1]==[] (
+    set CMAKE_BUILD_TYPE=Debug
 ) else (
-    set PDCURSES_ROOT=%1
+    set CMAKE_BUILD_TYPE=%1
 )
 
 if [%2]==[] (
-    set CMAKE_BUILD_TYPE=Debug
-) else (
-    set CMAKE_BUILD_TYPE=%2
-)
-
-if [%3]==[] (
     set GENERATOR=NMake Makefiles
 ) else (
-    set GENERATOR=%3
+    set GENERATOR=%2
 )
 
 echo ===========================================
@@ -23,7 +21,7 @@ echo === GENERATING CMAKE PROJECT: TermTools ===
 echo ===========================================
 echo.
 
-call cmake -DPDCURSES_ROOT=%PDCURSES_ROOT% -DCMAKE_BUILD_TYPE=%CMAKE_BUILD_TYPE% -G"%GENERATOR%" -B .\build
+call cmake -DCMAKE_BUILD_TYPE=%CMAKE_BUILD_TYPE% -G"%GENERATOR%" -B .\build
 
 cd .\build
 
@@ -37,7 +35,7 @@ echo.
 goto :eof
 
 :usage
-echo build_cmake.bat PDCURSES_ROOT [CMAKE_BUILD_TYPE] [GENERATOR]
+echo build_cmake.bat [CMAKE_BUILD_TYPE] [GENERATOR]
 echo.
 
 @echo on

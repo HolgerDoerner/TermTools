@@ -1,10 +1,10 @@
-# TIM - Type IMproved
-A small utility meant as a 'drop-in' replacement for 'type'-command.
+# pager - An Terminal-Pager
+A small utility similar to *less*.
 
 ## Usage
-```TIM.EXE <filename>``` \
+```less.exe <filename>``` \
     or \
-```other command | TIM.EXE```
+```other command | less.exe```
 
 Controls:
 
@@ -16,4 +16,4 @@ Controls:
     END            = jump to end of the input
     ESC, CTRL+C    = exit
 
-If a filename is given, it will be read. Otherwise TIM trys to read from 'stdin'.
+If a filename is given, it will be read. Otherwise pager.exe trys to read from 'stdin'.

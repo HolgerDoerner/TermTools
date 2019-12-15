@@ -7,7 +7,7 @@
 A collection of tools for the terminal written in C. They are first and foremost aimed for the Windows platform.
 
 ## Included Tools
-- [TIM](tim/README.md) - Type IMproved, a replacement for 'type'. More like less...
+- [pager](pager/README.md) - A terminal pager. More like less...
 
 ## Build
 ### Requirements
