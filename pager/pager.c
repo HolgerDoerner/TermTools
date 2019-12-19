@@ -24,7 +24,7 @@
 
 #ifndef PDC_WIDE
     #define PDC_WIDE
-#endif
+#endif // PDC_WIDE
 
 #ifndef PDC_FORCE_UTF8
     #define PDC_FORCE_UTF8
