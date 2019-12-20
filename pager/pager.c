@@ -58,7 +58,7 @@ void help(void);
 
 int main(int argc, char **argv)
 {
-    setlocale(LC_ALL, "UTF-8");
+    setlocale(LC_ALL, "");
     
     if (argc >= 2)
     {
@@ -71,7 +71,7 @@ int main(int argc, char **argv)
         pFile = fopen(argv[1], "r");
         if (pFile == NULL)
         {
-            fprintf(stderr, "* ERROR: Could not open %s", argv[1]);
+            perror("* ERROR");
         }
     }
     else
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
         screenBuff[sbCount] = (char *)malloc(sizeof(char) * BUFSIZ);
         if (screenBuff[sbCount] == NULL)
         {
-            fprintf(stderr, "* ERROR: Failed memory allocation!\n");
+            perror("* ERROR");
             exit(1);
         }
 
@@ -102,7 +102,7 @@ int main(int argc, char **argv)
 
             if (screenBuff == NULL)
             {
-                fprintf(stderr, "* ERROR: Failed reallocation of ScreenBuffer!\n");
+                perror("* ERROR");
                 exit(1);
             }
         }
@@ -110,7 +110,7 @@ int main(int argc, char **argv)
 
     if (!isStdinRedirected && fclose(pFile))
     {
-        fprintf(stderr, "* ERROR: Closing %s failed!\n", argv[1]);
+        perror("* ERROR");
         exit(1);
     }
     else
@@ -253,9 +253,9 @@ void cleanup()
 void help()
 {
     _wprintf_p(L"Usage:\n");
-    _wprintf_p(L"    TIM.EXE <filename>\n");
+    _wprintf_p(L"    pager.exe <filename>\n");
     _wprintf_p(L"        or\n");
-    _wprintf_p(L"    type <filename> | TIM.EXE\n");
+    _wprintf_p(L"    type <filename> | pager.exe\n");
     _wprintf_p(L"\n");
     _wprintf_p(L"Controls:\n");
     _wprintf_p(L"    ARROW_UP, K    = scroll 1 line up\n");
