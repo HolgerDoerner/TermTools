@@ -39,7 +39,6 @@
 
 /* global vars */
 int lineCount = 0;
-int caretPos = 1;
 char inBuf[BUFSIZ];
 char **screenBuff;
 wchar_t **testBuff;
@@ -53,6 +52,7 @@ short isStdinRedirected = FALSE;
 void scrollUp(const int);
 void scrollDown(const int);
 void scrollHomeEnd(const int);
+void updateStatusLine(void);
 void cleanup(void);
 void help(void);
 
@@ -123,12 +123,16 @@ int main(int argc, char **argv)
     keypad(term, TRUE);
     scrollok(term, TRUE);
     noecho();
+    nonl();
     curs_set(0);
 
-    for (; lineCount < (LINES - 1); ++lineCount)
+    for (; lineCount <= (LINES - 2); ++lineCount)
     {
-        waddstr(term, screenBuff[lineCount]);
+        wscrl(term, 1);
+        mvwaddstr(term, LINES-2, 0, screenBuff[lineCount]);
     }
+
+    updateStatusLine();
 
     // main loop
     while (1)
@@ -158,19 +162,14 @@ int main(int argc, char **argv)
 
 void scrollUp(const int range)
 {
+    lineCount -= LINES-1;
+
     for (int i = 0; i < range; ++i)
     {
-        if (caretPos == BOTTOM)
-        {
-            lineCount -= LINES;
-            caretPos = TOP;
-        }
-
         if (lineCount >= 0)
         {
             wscrl(term, -1);
-            move(0, 0);
-            waddstr(term, screenBuff[lineCount--]);
+            mvwaddstr(term, 0, 0, screenBuff[lineCount--]);
             wrefresh(term);
         }
         else
@@ -180,22 +179,20 @@ void scrollUp(const int range)
             break;
         }
     }
+
+    lineCount += LINES-1;
+
+    updateStatusLine();
 }
 
 void scrollDown(const int range)
 {
     for (int i = 0; i < range; ++i)
     {
-        if (caretPos == TOP)
-        {
-            lineCount += LINES;
-            caretPos = BOTTOM;
-            move(LINES-1, 0);
-        }
-
         if (lineCount < sbCount)
         {
-            waddstr(term, screenBuff[lineCount++]);
+            wscrl(term, 1);
+            mvwaddstr(term, LINES-2, 0, screenBuff[lineCount++]);
             wrefresh(term);
         }
         else
@@ -205,6 +202,8 @@ void scrollDown(const int range)
             break;
         }
     }
+
+    updateStatusLine();
 }
 
 void scrollHomeEnd(const int direction)
@@ -214,16 +213,29 @@ void scrollHomeEnd(const int direction)
     {
         beep();
         flash();
+        return;
     }
 
-    move(0, 0);
     lineCount = direction ? (sbCount - LINES) : 0;
     for (int i = 0; i < (direction ? LINES : LINES-1); ++i)
     {
-        waddstr(term, screenBuff[lineCount++]);
+        wscrl(term, 1);
+        mvwaddstr(term, LINES-2, 0, screenBuff[lineCount++]);
+        wrefresh(term);
     }
-    caretPos = 1;
-    wrefresh(term);
+
+    updateStatusLine();
+}
+
+void updateStatusLine()
+{
+    wmove(term, LINES-1, 0);
+    wclrtoeol(term);
+
+    if(lineCount == sbCount)
+        mvwaddstr(term, LINES-1, 0, "--- EOF ---");
+    else
+        mvwaddstr(term, LINES-1, 0, "--- MORE ---");
 }
 
 void cleanup()
