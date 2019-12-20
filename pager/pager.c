@@ -1,26 +1,30 @@
 /*
- * TIM - Type IMproved
+ * pager - a simple terminal pager
+ * 
+ * Version: 1.0.0
+ * Date: 2019-12-20
+ * Author: Holger Dörner <holger.doerner@gmail.com>
+ * 
+ * This application is part of the 'TermTools'-project.
+ * GitHub: https://GitHub.com/HolgerDoerner/TermTools
 */
 
-#ifdef _MSC_VER
-  #define _CRT_SECURE_NO_WARNINGS
-  #define WIN32_LEAN_AND_MEAN
-  #define USE_LIBCMT
-  #pragma comment(lib, "user32.lib")
-  #pragma comment(lib, "advapi32.lib")
-  #pragma comment(lib, "pdcurses.lib")
-#endif
+ #define _CRT_SECURE_NO_WARNINGS
+ #define WIN32_LEAN_AND_MEAN
+ #define USE_LIBCMT
+ #pragma comment(lib, "user32.lib")
+ #pragma comment(lib, "advapi32.lib")
+ #pragma comment(lib, "pdcurses.lib")
 
 #include <windows.h>
-
-#ifdef MOUSE_MOVED
-    #undef MOUSE_MOVED
-#endif // MOUSE_MOVED
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
+
+#ifdef MOUSE_MOVED
+    #undef MOUSE_MOVED
+#endif // MOUSE_MOVED
 
 #ifndef PDC_WIDE
     #define PDC_WIDE
@@ -47,6 +51,7 @@ int sbCount = 0;
 FILE *pFile;
 WINDOW *term;
 short isStdinRedirected = FALSE;
+char fileName[25];
 /* END (global vars) */
 
 void scrollUp(const int);
@@ -54,6 +59,7 @@ void scrollDown(const int);
 void scrollHomeEnd(const int);
 void updateStatusLine(void);
 void cleanup(void);
+void version(void);
 void help(void);
 
 int main(int argc, char **argv)
@@ -62,11 +68,18 @@ int main(int argc, char **argv)
     
     if (argc >= 2)
     {
-        if (strstr(argv[1], "/?"))
+        if (_stricmp(argv[1], "/?") == 0)
         {
             help();
             exit(0);
         }
+        else if (_stricmp(argv[1], "/v") == 0)
+        {
+            version();
+            exit(0);
+        }
+
+        snprintf(fileName, strlen(argv[1])+1, "%s", argv[1]);
 
         pFile = fopen(argv[1], "r");
         if (pFile == NULL)
@@ -76,6 +89,8 @@ int main(int argc, char **argv)
     }
     else
     {
+        char tmp[] = "pipe";
+        snprintf(fileName, strlen(tmp)+1, "%s", tmp);
         pFile = stdin;
         isStdinRedirected = TRUE;
     }
@@ -139,7 +154,7 @@ int main(int argc, char **argv)
     {
         switch (getch())
         {
-            case VK_ESCAPE: case 3: exit(0);
+            case VK_ESCAPE: case 'q': exit(0);
             case KEY_DOWN: case VK_DOWN: case KEY_C2: case 'j':
                 scrollDown(1); break;
             case KEY_UP: case VK_UP: case KEY_A2: case 'k':
@@ -162,7 +177,7 @@ int main(int argc, char **argv)
 
 void scrollUp(const int range)
 {
-    lineCount -= LINES-1;
+    lineCount -= LINES;
 
     for (int i = 0; i < range; ++i)
     {
@@ -180,7 +195,7 @@ void scrollUp(const int range)
         }
     }
 
-    lineCount += LINES-1;
+    lineCount += LINES;
 
     updateStatusLine();
 }
@@ -232,10 +247,9 @@ void updateStatusLine()
     wmove(term, LINES-1, 0);
     wclrtoeol(term);
 
-    if(lineCount == sbCount)
-        mvwaddstr(term, LINES-1, 0, "--- EOF ---");
-    else
-        mvwaddstr(term, LINES-1, 0, "--- MORE ---");
+    char tmp[80];
+    snprintf(tmp, strlen(tmp), "--- %s: %d of %d ---", fileName, lineCount, sbCount);
+    mvwaddstr(term, LINES-1, 0, tmp);
 }
 
 void cleanup()
@@ -250,20 +264,25 @@ void cleanup()
     screenBuff = NULL;
 }
 
+void version()
+{
+    printf("pager.exe - Version: 1.0.0 - Date: 2019-12-20\n");
+}
+
 void help()
 {
-    _wprintf_p(L"Usage:\n");
-    _wprintf_p(L"    pager.exe <filename>\n");
-    _wprintf_p(L"        or\n");
-    _wprintf_p(L"    type <filename> | pager.exe\n");
-    _wprintf_p(L"\n");
-    _wprintf_p(L"Controls:\n");
-    _wprintf_p(L"    ARROW_UP, K    = scroll 1 line up\n");
-    _wprintf_p(L"    ARROW_DOWN, J  = scroll 1 line down\n");
-    _wprintf_p(L"    PG_UP, l       = scroll 1 page up\n");
-    _wprintf_p(L"    PG_DOWN, h     = scroll 1 page down\n");
-    _wprintf_p(L"    HOME           = jump to beginning of the input\n");
-    _wprintf_p(L"    END            = jump to end of the input\n");
-    _wprintf_p(L"    ESC, CTRL+C    = exit\n");
-    _wprintf_p(L"\n");
+    printf("Usage:\n");
+    printf("    pager.exe <filename>\n");
+    printf("        or\n");
+    printf("    type <filename> | pager.exe\n");
+    printf("\n");
+    printf("Controls:\n");
+    printf("    ARROW_UP, K    = scroll 1 line up\n");
+    printf("    ARROW_DOWN, J  = scroll 1 line down\n");
+    printf("    PG_UP, l       = scroll 1 page up\n");
+    printf("    PG_DOWN, h     = scroll 1 page down\n");
+    printf("    HOME           = jump to the beginning\n");
+    printf("    END            = jump to the end\n");
+    printf("    ESC, q         = exit\n");
+    printf("\n");
 }

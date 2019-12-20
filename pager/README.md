@@ -1,10 +1,10 @@
-# pager - An Terminal-Pager
+# pager - A Terminal-Pager
 A small utility similar to *less*.
 
 ## Usage
-```less.exe <filename>``` \
+```pager.exe <filename>``` \
     or \
-```other command | less.exe```
+```other command | pager.exe```
 
 Controls:
 
@@ -14,6 +14,6 @@ Controls:
     PG_DOWN, h     = scroll 1 page down
     HOME           = jump to beginning of the input
     END            = jump to end of the input
-    ESC, CTRL+C    = exit
+    ESC, q          = exit
 
 If a filename is given, it will be read. Otherwise pager.exe trys to read from 'stdin'.
