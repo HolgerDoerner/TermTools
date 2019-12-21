@@ -54,6 +54,7 @@ short isStdinRedirected = FALSE;
 char fileName[25];
 /* END (global vars) */
 
+void reDrawScreen(void);
 void scrollUp(const int);
 void scrollDown(const int);
 void scrollHomeEnd(const int);
@@ -134,12 +135,12 @@ int main(int argc, char **argv)
     }
     
     term = initscr();
+    curs_set(0);
     raw();
     keypad(term, TRUE);
     scrollok(term, TRUE);
     noecho();
     nonl();
-    curs_set(0);
 
     for (; lineCount <= (LINES - 2); ++lineCount)
     {
@@ -148,9 +149,10 @@ int main(int argc, char **argv)
     }
 
     updateStatusLine();
+    // reDrawScreen(); // need fix
 
     // main loop
-    while (1)
+    while (TRUE)
     {
         switch (getch())
         {
@@ -163,16 +165,51 @@ int main(int argc, char **argv)
                 scrollDown(LINES); break;
             case KEY_PPAGE: case VK_PRIOR: case 451: case 'l':
                 scrollUp(LINES); break;
-            case KEY_HOME: case VK_HOME: case 449:
+            case KEY_HOME: case VK_HOME: case 449: case 'b':
                 scrollHomeEnd(0); break;
-            case KEY_END: case VK_END: case 455:
+            case KEY_END: case VK_END: case 455: case 'e':
                 scrollHomeEnd(1); break;
+            // TODO: implement this...
+            // case KEY_RESIZE:
+            //     reDrawScreen();
+            //     break;
             default: break;
         }
     }
 
-    cleanup();
     endwin();
+    cleanup();
+}
+
+void reDrawScreen()
+{
+    // TODO: implement this CORRECTLY...
+
+    // if (lineCount > LINES)
+    // {
+    //     lineCount -= LINES;
+    // }
+
+    if (is_termresized())
+    {
+        // int oldLINES = LINES;
+        resize_term(0, 0);
+    //     if (LINES < oldLINES)
+    //     {
+    //         updateStatusLine();
+    //         return;
+    //     }
+    //     wclear(term);
+    //     wrefresh(term);
+    // }
+
+    // for (int i = 0; i <= (LINES - 2); ++i, ++lineCount)
+    // {
+    //     wscrl(term, 1);
+    //     mvwaddstr(term, LINES-2, 0, screenBuff[lineCount]);
+    }
+
+    updateStatusLine();
 }
 
 void scrollUp(const int range)
