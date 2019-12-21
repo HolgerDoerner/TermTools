@@ -57,7 +57,7 @@ char fileName[25];
 void reDrawScreen(void);
 void scrollUp(const int);
 void scrollDown(const int);
-void scrollHomeEnd(const int);
+void gotoStartEnd(const int);
 void updateStatusLine(void);
 void cleanup(void);
 void version(void);
@@ -166,9 +166,9 @@ int main(int argc, char **argv)
             case KEY_PPAGE: case VK_PRIOR: case 451: case 'l':
                 scrollUp(LINES); break;
             case KEY_HOME: case VK_HOME: case 449: case 'b':
-                scrollHomeEnd(0); break;
+                gotoStartEnd(0); break;
             case KEY_END: case VK_END: case 455: case 'e':
-                scrollHomeEnd(1); break;
+                gotoStartEnd(1); break;
             // TODO: implement this...
             // case KEY_RESIZE:
             //     reDrawScreen();
@@ -258,7 +258,7 @@ void scrollDown(const int range)
     updateStatusLine();
 }
 
-void scrollHomeEnd(const int direction)
+void gotoStartEnd(const int direction)
 {
     if ( ((lineCount == LINES-1) & (direction == TOP))
         || ((lineCount == sbCount) & (direction == BOTTOM)) )
