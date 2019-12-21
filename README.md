@@ -20,6 +20,7 @@ I could have done that, but I have to work with this 'high-level' stuff day-to-d
 
 # Included Tools
 - [pager](pager/README.md) - A terminal pager. More like less...
+- [counter](counter/README.md) - A simple counter. Counts lines or words in text-files.
 
 # Build
 ## Requirements
@@ -63,4 +64,8 @@ Now, when configuration finished without errors, you are in the *build* sub-dire
 
 to compile all binaries, or pick one with
 
-    C:\TermTools\build> nmake pager
+    C:\TermTools\build> nmake <TARGET_NAME>
+
+to get a list of available targets, type
+
+    C:\TermTools\build> nmake help

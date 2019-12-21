@@ -1,14 +1,12 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(pager VERSION 1.0.0 LANGUAGES C)
+project(counter VERSION 0.1.0 LANGUAGES C)
 
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
 
 set(EXECUTABLE_OUTPUT_PATH ../${PROJECT_NAME}/${CMAKE_BUILD_TYPE})
 
-add_executable(${PROJECT_NAME} pager.c)
+add_executable(${PROJECT_NAME} counter.c)
 
-target_link_libraries(${PROJECT_NAME} ${CURSES_LIBRARIES})
-add_dependencies(${PROJECT_NAME} PDCurses)
 set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME ${PROJECT_NAME}.exe)

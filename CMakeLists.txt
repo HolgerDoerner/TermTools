@@ -48,8 +48,9 @@ add_custom_command(TARGET "PDCurses_clean"
 
 # targets
 add_subdirectory(pager)
+add_subdirectory(counter)
 
-install(TARGETS pager
+install(TARGETS pager counter
         CONFIGURATIONS Release)
 
 install(CODE "execute_process(COMMAND ${PROJECT_SOURCE_DIR}/etc/set_env.bat)"

@@ -9,12 +9,12 @@
  * GitHub: https://GitHub.com/HolgerDoerner/TermTools
 */
 
- #define _CRT_SECURE_NO_WARNINGS
- #define WIN32_LEAN_AND_MEAN
- #define USE_LIBCMT
- #pragma comment(lib, "user32.lib")
- #pragma comment(lib, "advapi32.lib")
- #pragma comment(lib, "pdcurses.lib")
+#define _CRT_SECURE_NO_WARNINGS
+#define WIN32_LEAN_AND_MEAN
+#define USE_LIBCMT
+#pragma comment(lib, "user32.lib")
+#pragma comment(lib, "advapi32.lib")
+#pragma comment(lib, "pdcurses.lib")
 
 #include <windows.h>
 #include <stdio.h>
@@ -151,11 +151,12 @@ int main(int argc, char **argv)
     // reDrawScreen(); // need fix
 
     // main loop
-    while (TRUE)
+    int isRunning = TRUE;
+    while (isRunning)
     {
         switch (getch())
         {
-            case VK_ESCAPE: case 'q': exit(0);
+            case VK_ESCAPE: case 'q': isRunning = FALSE; break;
             case KEY_DOWN: case VK_DOWN: case KEY_C2: case 'j':
                 scrollDown(1); break;
             case KEY_UP: case VK_UP: case KEY_A2: case 'k':
@@ -168,47 +169,47 @@ int main(int argc, char **argv)
                 gotoStartEnd(0); break;
             case KEY_END: case VK_END: case 455: case 'e':
                 gotoStartEnd(1); break;
-            // TODO: implement this...
-            // case KEY_RESIZE:
-            //     reDrawScreen();
-            //     break;
+            // for now, just exit on resize
+            case KEY_RESIZE: isRunning = FALSE; break;
             default: break;
         }
     }
 
     endwin();
     cleanup();
+    return 0;
 }
 
 void reDrawScreen()
 {
-    // TODO: implement this CORRECTLY...
+    // TODO: shit is broken currently...
+    int oldLINES = LINES;
 
-    // if (lineCount > LINES)
-    // {
-    //     lineCount -= LINES;
-    // }
+    resize_term(0, 0);
 
-    if (is_termresized())
+    int lineDiff;
+    lineDiff = LINES - oldLINES;
+
+    if (lineDiff < 0 || lineDiff > 0)
     {
-        // int oldLINES = LINES;
-        resize_term(0, 0);
-    //     if (LINES < oldLINES)
-    //     {
-    //         updateStatusLine();
-    //         return;
-    //     }
-    //     wclear(term);
-    //     wrefresh(term);
-    // }
+        wclear(term);
 
-    // for (int i = 0; i <= (LINES - 2); ++i, ++lineCount)
-    // {
-    //     wscrl(term, 1);
-    //     mvwaddstr(term, LINES-2, 0, screenBuff[lineCount]);
+        if (lineCount >= oldLINES)
+            lineCount -= oldLINES;
+
+        for (int i = 0; i <= (LINES - 2); ++i)
+        {
+            wscrl(term, -1);
+
+            if (lineCount < sbCount || lineCount > 0)
+                mvwaddstr(term, LINES-2, 0, screenBuff[lineCount++]);
+            else
+                mvwaddstr(term, LINES-2, 0, "");
+        }
+
+        wrefresh(term);
+        updateStatusLine();
     }
-
-    updateStatusLine();
 }
 
 void scrollUp(const int range)
