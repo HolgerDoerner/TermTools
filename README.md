@@ -51,7 +51,7 @@ In the newly opened terminal, change to the directory where you cloned *TermTool
     C:\> cd <PATH_TO_LOCAL_TREE>\TermTools
     C:\TermTools> build_cmake.bat
 
-Whith generates a 'Debug' configuration. To use a 'Release' configuration, run
+Whitch generates a 'Debug' configuration. To use a 'Release' configuration, run
 
     C:\TermTools> build_cmake.bat Release
 
