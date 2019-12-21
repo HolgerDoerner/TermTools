@@ -45,7 +45,6 @@
 int lineCount = 0;
 char inBuf[BUFSIZ];
 char **screenBuff;
-wchar_t **testBuff;
 int allocCount = 1;
 int sbCount = 0;
 FILE *pFile;
