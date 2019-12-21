@@ -50,7 +50,7 @@ int sbCount = 0;
 FILE *pFile;
 WINDOW *term;
 short isStdinRedirected = FALSE;
-char fileName[25];
+char fileName[40];
 /* END (global vars) */
 
 void reDrawScreen(void);
