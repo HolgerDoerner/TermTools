@@ -1,5 +1,8 @@
 name: TermTools CI (Release)
-on: [push]
+on:
+  push:
+    tags: 
+      - 'v*'
 
 jobs:
   build:
@@ -26,3 +29,6 @@ jobs:
       - name: Run CTest
         run: nmake test
         working-directory: .\build
+      - name: package
+        if: success()
+        run: zip test.zip ./build/bin/Release/*.exe
