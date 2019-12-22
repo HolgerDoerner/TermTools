@@ -1,7 +1,7 @@
 /*
  * pager - a simple terminal pager
  * 
- * Version: 1.0.0
+ * Version: 0.5.0
  * Date: 2019-12-20
  * Author: Holger Dörner <holger.doerner@gmail.com>
  * 
@@ -270,7 +270,7 @@ void cleanup()
 
 void version()
 {
-    printf("pager.exe - Version: 1.0.0 - Date: 2019-12-20\n");
+    printf("pager.exe - Version: 0.5.0 - Date: 2019-12-20\n");
 }
 
 void help()
