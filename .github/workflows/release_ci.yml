@@ -1,0 +1,28 @@
+name: TermTools CI (Release)
+on: [push]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v1
+  #     - name: configure
+  #       run: ./configure
+      - name: Enable Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1.0.0
+        with:
+          arch: x64
+          # Windows SDK number to build for
+  #         sdk: # optional
+          # Enable Specre mitigations
+  #         spectre: # optional
+          # VC++ compiler toolset version
+          toolset: 14.24
+      - name: Configure CMake (Release)
+        run: cmake -DCMAKE_BUILD_TYPE=Release -G"NMake Makefiles" -B .\build
+      - name: Run NMAKE
+        run: nmake
+        working-directory: .\build
+      - name: Run CTest
+        run: nmake test
+        working-directory: .\build
