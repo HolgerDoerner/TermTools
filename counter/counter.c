@@ -16,6 +16,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define CLINES 0
+#define CWORDS 1
+
 short parseArgs(int, char **, char **);
 size_t count(const char *, short);
 void usage(void);
@@ -36,10 +39,10 @@ int main(int argc, char **argv)
         case -1:
             exit(1);
         case 1:
-            ret = count(fileName, 0);
+            ret = count(fileName, CLINES);
             break;
         case 2:
-            ret = count(fileName, 1);
+            ret = count(fileName, CWORDS);
             break;
         default:
             usage();
@@ -107,7 +110,7 @@ size_t count(const char *fileName, short mode)
     char buffer[BUFSIZ];
     while (fgets(buffer, BUFSIZ, pFile))
     {
-        if (mode)
+        if (mode == CWORDS)
         {
             tok = strtok(buffer, delimeter);
 
@@ -118,7 +121,7 @@ size_t count(const char *fileName, short mode)
             }
         }
 
-        if (!mode) ++counter;
+        if (mode == CLINES) ++counter;
 
         if (feof(pFile)) break;
     }
@@ -134,5 +137,12 @@ size_t count(const char *fileName, short mode)
 
 void usage()
 {
-    printf("counter - counts stuff...\n");
+    printf("counter - Counts Lines or Words\n");
+    printf("\n");
+    printf("Usage:\n");
+    printf("\tcounter.exe [/W] <filename>\n");
+    printf("\n");
+    printf("Parameter:\n");
+    printf("\t/W            = counts words instead of lines\n");
+    printf("\t<filename>    = path/name of the file to read\n");
 }
