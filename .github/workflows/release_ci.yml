@@ -32,4 +32,5 @@ jobs:
         working-directory: .\build
       - name: package
         if: success()
-        run: zip test.zip ./build/bin/Release/*.exe
+        run: |
+          zip test.zip ./build/bin/Release/*.exe
