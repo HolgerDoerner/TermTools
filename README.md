@@ -3,21 +3,15 @@
 A collection of tools for the terminal written in C. They are first and foremost aimed for the Windows platform.
 
 - [About](#about)
-- [FAQ](#faq)
-  - [Why in the hell C ?](#why-in-the-hell-c)
-  - [Why not Java or better, C#? Especialy on Windows?](#why-not-java-or-better-c-especialy-on-windows)
 - [Included Tools](#included-tools)
 - [Build](#build)
   - [Requirements](#requirements)
   - [Getting startet on the command-line](#getting-startet-on-the-command-line)
+- [FAQ](#faq)
+  - [Why in the hell C ?](#why-in-the-hell-c)
+  - [Why not Java or better, C#? Especialy on Windows?](#why-not-java-or-better-c-especialy-on-windows)
 
 # About
-# FAQ
-## Why in the hell *C* ?
-Because I like it, that's why!! I started programming back in the mid 90's lerning C on my own. Besides of that, it is an **AWESOME** language, and doesn't get the respect nowdays it realy deserves! It is a fast, get shit done language with no-nonsense (okay, almost).
-
-## Why not Java or better, C#? Especialy on Windows?
-I could have done that, but I have to work with this 'high-level' stuff day-to-day as an full-time developer. I do *TermTools* in my free time (so as the other stuff an my  GitHub account), and in **MY** free time I like to use what's the most exciting and fun to me. Or stuff that teaches me new things. On the other hand, the most technologies today bring in *A LOT* of overhead, definetly too much for small applications like this.
 
 # Included Tools
 - [pager](pager/README.md) - A terminal pager. More like less...
@@ -70,3 +64,10 @@ to compile all binaries, or pick one with
 to get a list of available targets, type
 
     C:\TermTools\build> nmake help
+
+# FAQ
+## Why in the hell *C* ?
+Because I like it, that's why!! I started programming back in the mid 90's lerning C on my own. Besides of that, it is an **AWESOME** language, and doesn't get the respect nowdays it realy deserves! It is a fast, get shit done language with no-nonsense (okay, almost).
+
+## Why not Java or better, C#? Especialy on Windows?
+I could have done that, but I have to work with this 'high-level' stuff day-to-day as an full-time developer. I do *TermTools* in my free time (so as the other stuff an my  GitHub account), and in **MY** free time I like to use what's the most exciting and fun to me. Or stuff that teaches me new things. On the other hand, the most technologies today bring in *A LOT* of overhead, definetly too much for small applications like this.
