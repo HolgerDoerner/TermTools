@@ -12,7 +12,9 @@ jobs:
 #     - name: configure
 #       run: ./configure
     - name: configure
-      run: build_cmake.bat Release
+      run: cmake -DCMAKE_BUILD_TYPE=Release -G"NMake Makefiles" -B .\build
+    - name: cd build
+      run: cd .\build
     - name: make
       run: make
 #     - name: make check
