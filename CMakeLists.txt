@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(TermTools VERSION 0.1.0)
+project(TermTools VERSION 0.1.0 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11)
 
@@ -9,7 +9,9 @@ string(REPLACE "/MDd" "/MTd" CMAKE_C_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /nologo /W3 /EHsc")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /nologo /W3 /EHsc")
 
-include(CTest)
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin/${CMAKE_BUILD_TYPE})
+
+# include(CTest)
 enable_testing()
 
 # set path to 3rd-party directory
@@ -57,18 +59,13 @@ install(CODE "execute_process(COMMAND ${PROJECT_SOURCE_DIR}/etc/set_env.bat)"
         OUTPUT_STRIP_TRAILING_WHITESPACE
         ERROR_STRIP_TRAILING_WHITESPACE)
 
-#if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(CMAKE_INSTALL_PREFIX "c:/users/$ENV{USERNAME}/TermTools" CACHE PATH "..." FORCE)
-#endif()
-
-# set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-# set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-# include(CPack)
+set(CMAKE_INSTALL_PREFIX "c:/users/$ENV{USERNAME}/TermTools" CACHE PATH "..." FORCE)
 
 message("General:")
 message("\tCMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 message("\tCMAKE_C_FLAGS_DEBUG: ${CMAKE_C_FLAGS_DEBUG}")
 message("\tCMAKE_C_FLAGS_RELEASE: ${CMAKE_C_FLAGS_RELEASE}")
+message("\tEXECUTABLE_OUTPUT_PATH: ${EXECUTABLE_OUTPUT_PATH}")
 message("\t3RD-PARTY DIR: ${3RD_PARTY}\n")
 
 message("PDCURSES:")

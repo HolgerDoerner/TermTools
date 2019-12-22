@@ -53,7 +53,6 @@ short isStdinRedirected = FALSE;
 char fileName[40];
 /* END (global vars) */
 
-void reDrawScreen(void);
 void scrollUp(const int);
 void scrollDown(const int);
 void gotoStartEnd(const int);
@@ -178,38 +177,6 @@ int main(int argc, char **argv)
     endwin();
     cleanup();
     return 0;
-}
-
-void reDrawScreen()
-{
-    // TODO: shit is broken currently...
-    int oldLINES = LINES;
-
-    resize_term(0, 0);
-
-    int lineDiff;
-    lineDiff = LINES - oldLINES;
-
-    if (lineDiff < 0 || lineDiff > 0)
-    {
-        wclear(term);
-
-        if (lineCount >= oldLINES)
-            lineCount -= oldLINES;
-
-        for (int i = 0; i <= (LINES - 2); ++i)
-        {
-            wscrl(term, -1);
-
-            if (lineCount < sbCount || lineCount > 0)
-                mvwaddstr(term, LINES-2, 0, screenBuff[lineCount++]);
-            else
-                mvwaddstr(term, LINES-2, 0, "");
-        }
-
-        wrefresh(term);
-        updateStatusLine();
-    }
 }
 
 void scrollUp(const int range)

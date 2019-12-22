@@ -107,12 +107,15 @@ size_t count(const char *fileName, short mode)
     char buffer[BUFSIZ];
     while (fgets(buffer, BUFSIZ, pFile))
     {
-        tok = strtok(buffer, delimeter);
-
-        while (tok)
+        if (mode)
         {
-            if (mode) ++counter;
-            tok = strtok(NULL, delimeter);
+            tok = strtok(buffer, delimeter);
+
+            while (tok)
+            {
+                ++counter;
+                tok = strtok(NULL, delimeter);
+            }
         }
 
         if (!mode) ++counter;
