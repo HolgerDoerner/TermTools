@@ -16,7 +16,7 @@ set(TEST_FILES_DIR ${CMAKE_SOURCE_DIR}/etc/test-files)
 enable_testing()
 
 # set path to 3rd-party directory
-set(3RD_PARTY ${PROJECT_SOURCE_DIR}/3rd-party)
+set(3RD_PARTY ${CMAKE_SOURCE_DIR}/3rd-party)
 
 # ==== BEGIN PDCurses ====
 include(ExternalProject)
@@ -47,7 +47,7 @@ include_directories(${CURSES_INCLUDE_DIRS})
 add_custom_target("PDCurses_clean")
 add_custom_command(TARGET "PDCurses_clean"
                     COMMENT "=== Cleaning: PDCurses ==="
-                    WORKING_DIRECTORY ${PDCURSES_ROOT}/wincon
+                    WORKING_DIRECTORY ${CURSES_INCLUDE_DIRS}/wincon
                     COMMAND nmake -f Makefile.vc clean)
 
 add_custom_target("zip_release")

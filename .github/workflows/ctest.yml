@@ -17,7 +17,7 @@ jobs:
           # VC++ compiler toolset version
           toolset: 14.24
       - name: Configure CMake (Release)
-        run: cmake -DCMAKE_BUILD_TYPE=Release -G"NMake Makefiles" -B .\build
+        run: cmake -DCMAKE_BUILD_TYPE=Debug -G"NMake Makefiles" -B .\build
       - name: Run NMAKE
         run: nmake
         working-directory: .\build
