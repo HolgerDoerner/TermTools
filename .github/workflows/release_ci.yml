@@ -23,9 +23,6 @@ jobs:
       - name: Run NMAKE
         run: nmake
         working-directory: .\build
-  test:
-    runs-on: windows-latest
-    steps:
       - name: Run CTest
         run: nmake test
         working-directory: .\build
