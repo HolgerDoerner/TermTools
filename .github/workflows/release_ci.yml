@@ -36,3 +36,9 @@ jobs:
       - name: copy files
         if: success()
         run: copy ./build/bin/Release/*.exe ./output
+      - name: artifacts
+        if: success()
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: release-binaries
+          path: ./output
