@@ -1,4 +1,4 @@
-name: TermTools Build/Test CI (Release)
+name: TermTools Build CI (Release)
 on: [push]
 
 jobs:
