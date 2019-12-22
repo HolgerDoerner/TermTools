@@ -1,9 +1,9 @@
 name: TermTools CI (Release)
-on: [push]
-# on:
-#   push:
-#     tags: 
-#       - 'v*'
+# on: [push]
+on:
+  push:
+    tags: 
+      - 'v*'
 
 jobs:
   build:
@@ -36,29 +36,29 @@ jobs:
 #         run: copy ./build/bin/Release/*.exe ./output
       - name: Package Release Artifacts
         if: success()
-        run: 7z a TermTools-${{ github.ref }}.zip ./build/bin/Release/*.exe
-#       - name: Create a Release
-#         id: create_release
-#         if: success()
-#         uses: actions/create-release@v1
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#         with:
-#           tag_name: ${{ github.ref }}
-#           release_name: Release ${{ github.ref }}
-#           draft: false
-#           prerelease: false
-#       - name: Upload a Release Asset
-#         id: upload_release_assets
-#         if: success()
-#         uses: actions/upload-release-asset@v1.0.1
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#         with:
-#           upload_url: ${{ steps.create_release.outputs.upload_url }}
-#           # The path to the asset you want to upload
-#           asset_path: ./TermTools-${{ github.ref }}.zip
-#           # The name of the asset you want to upload
-#           asset_name: TermTools-${{ github.ref }}.zip
-#           # The content-type of the asset you want to upload. See the supported Media Types here: https://www.iana.org/assignments/media-types/media-types.xhtml for more information
-#           asset_content_type: application/zip
+        run: 7z a TermTools.zip ./build/bin/Release/*.exe
+      - name: Create a Release
+        id: create_release
+        if: success()
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload a Release Asset
+        id: upload_release_assets
+        if: success()
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          # The path to the asset you want to upload
+          asset_path: ./TermTools.zip
+          # The name of the asset you want to upload
+          asset_name: TermTools.zip
+          # The content-type of the asset you want to upload. See the supported Media Types here: https://www.iana.org/assignments/media-types/media-types.xhtml for more information
+          asset_content_type: application/zip
