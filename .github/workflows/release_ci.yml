@@ -32,5 +32,6 @@ jobs:
         working-directory: .\build
       - name: package
         if: success()
-        run: |
-          zip test.zip ./build/bin/Release/*.exe
+        uses: montudor/action-zip@v0.1.0
+        with:
+          args: zip -qq -r test.zip ./build/bin/Release/*.exe
