@@ -28,15 +28,15 @@ jobs:
       - name: Run CTest
         run: nmake test
         working-directory: .\build
-      - name: make output dir
-        if: success()
-        run: mkdir output
+#       - name: make output dir
+#         if: success()
+#         run: mkdir output
 #       - name: copy files
 #         if: success()
 #         run: copy ./build/bin/Release/*.exe ./output
       - name: Package Release Artifacts
         if: success()
-        run: 7zip a TermTools-${{ github.ref }}.zip ./build/bin/Release/*.exe
+        run: 7z a TermTools-${{ github.ref }}.zip ./build/bin/Release/*.exe
 #       - name: Create a Release
 #         id: create_release
 #         if: success()
