@@ -31,21 +31,12 @@ jobs:
       - name: make output dir
         if: success()
         run: mkdir output
-      - name: copy files
-        if: success()
-        run: copy ./build/bin/Release/*.exe ./output
-      - name: create artifact
-        id: create_artifact
-        if: success()
-        uses: actions/upload-artifact@v1.0.0
-        with:
-          name: TermTools
-          path: ./output
-#       - name: download artifact
+#       - name: copy files
 #         if: success()
-#         uses: actions/download-artifact@v1
-#         with:
-#           name: TermTools
+#         run: copy ./build/bin/Release/*.exe ./output
+      - name: Package Release Artifacts
+        if: success()
+        run: 7zip a TermTools-${{ github.ref }}.zip ./build/bin/Release/*.exe
 #       - name: Create a Release
 #         id: create_release
 #         if: success()
@@ -66,8 +57,8 @@ jobs:
 #         with:
 #           upload_url: ${{ steps.create_release.outputs.upload_url }}
 #           # The path to the asset you want to upload
-#           asset_path: ./TermTools/TermTools.zip
+#           asset_path: ./TermTools-${{ github.ref }}.zip
 #           # The name of the asset you want to upload
-#           asset_name: TermTools.zip
+#           asset_name: TermTools-${{ github.ref }}.zip
 #           # The content-type of the asset you want to upload. See the supported Media Types here: https://www.iana.org/assignments/media-types/media-types.xhtml for more information
 #           asset_content_type: application/zip
