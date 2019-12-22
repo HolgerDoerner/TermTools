@@ -26,10 +26,11 @@ jobs:
 #         uwp: # optional
     - name: configure
       run: cmake -DCMAKE_BUILD_TYPE=Release -G"NMake Makefiles" -B .\build
-    - name: cd build
-      run: cd .\build
+#     - name: cd build
+#       run: cd .\build
     - name: nmake
       run: nmake
+      working-directory: .\build
 #     - name: make check
 #       run: make check
 #     - name: make distcheck
