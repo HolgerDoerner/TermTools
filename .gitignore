@@ -21,3 +21,6 @@ build/
 
 # external
 3rd-party/
+
+# release artefacts
+*.zip

@@ -15,9 +15,9 @@ jobs:
         with:
           arch: x64
           # Windows SDK number to build for
-  #         sdk: # optional
+          # sdk:
           # Enable Specre mitigations
-  #         spectre: # optional
+          # spectre:
           # VC++ compiler toolset version
           toolset: 14.24
       - name: Configure CMake (Release)
@@ -28,15 +28,14 @@ jobs:
       - name: Run CTest
         run: nmake test
         working-directory: .\build
-#       - name: make output dir
-#         if: success()
-#         run: mkdir output
-#       - name: copy files
-#         if: success()
-#         run: copy ./build/bin/Release/*.exe ./output
-      - name: Package Release Artifacts
+      - name: NMake Install
         if: success()
-        run: 7z a TermTools.zip ./build/bin/Release/*.exe
+        run: nmake install
+        working-directory: .\build
+      - name: 7zip Create Release Artefact
+        if: success()
+        run: nmake zip_release
+        working-directory: .\build
       - name: Create a Release
         id: create_release
         if: success()
@@ -49,16 +48,12 @@ jobs:
           draft: false
           prerelease: false
       - name: Upload a Release Asset
-        id: upload_release_assets
         if: success()
         uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          # The path to the asset you want to upload
-          asset_path: ./TermTools.zip
-          # The name of the asset you want to upload
-          asset_name: TermTools.zip
-          # The content-type of the asset you want to upload. See the supported Media Types here: https://www.iana.org/assignments/media-types/media-types.xhtml for more information
+          asset_path: ./TermTools-Release.zip
+          asset_name: TermTools-Release.zip
           asset_content_type: application/zip
