@@ -17,3 +17,5 @@ Controls:
     ESC, q          = exit
 
 If a filename is given, it will be read. Otherwise pager.exe trys to read from 'stdin'.
+
+## todo ...
