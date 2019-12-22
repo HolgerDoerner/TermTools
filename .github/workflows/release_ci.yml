@@ -30,8 +30,9 @@ jobs:
       - name: Run CTest
         run: nmake test
         working-directory: .\build
-      - name: package
+      - name: make output dir
         if: success()
-        uses: montudor/action-zip@v0.1.0
-        with:
-          args: zip -qq -r test.zip ./build/bin/Release/*.exe
+        run: mkdir output
+      - name: copy files
+        if: success()
+        run: copy ./build/bin/Release/*.exe ./output
