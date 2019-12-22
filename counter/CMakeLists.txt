@@ -13,13 +13,13 @@ set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME ${PROJECT_NAME})
 
 # CTest cases
 add_test(NAME counter_linecount_43
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/testing
+        WORKING_DIRECTORY ${TEST_FILES_DIR}
         COMMAND ${PROJECT_NAME} test.txt)
 set_tests_properties(counter_linecount_43 PROPERTIES 
         PASS_REGULAR_EXPRESSION "43")
 
 add_test(NAME counter_wordcount_395
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/testing
+        WORKING_DIRECTORY ${TEST_FILES_DIR}
         COMMAND ${PROJECT_NAME} /w test.txt)
 set_tests_properties(counter_wordcount_395 PROPERTIES 
         PASS_REGULAR_EXPRESSION "395")
