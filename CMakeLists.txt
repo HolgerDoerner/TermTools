@@ -23,23 +23,22 @@ include(ExternalProject)
 ExternalProject_Add(PDCurses 
     GIT_REPOSITORY https://github.com/wmcbrine/PDCurses.git
     PREFIX ${3RD_PARTY}
-    SOURCE_DIR ${3RD_PARTY}/PDCurses
-    TMP_DIR ${3RD_PARTY}/PDCurses_tmp
-    STAMP_DIR ${3RD_PARTY}/PDCurses_stamp
     PATCH_COMMAND ""
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND cd ${3RD_PARTY}/PDCurses/wincon && nmake -f Makefile.vc WIDE=Y UTF8=Y
+    BUILD_COMMAND cd ${3RD_PARTY}/src/PDCurses/wincon && nmake -f Makefile.vc WIDE=Y UTF8=Y
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
 )
 
 set(CURSES_NEED_CURSES TRUE)
 set(CURSES_NEED_WIDE TRUE)
-set(CURSES_LIBRARY ${3RD_PARTY}/PDCurses/wincon/pdcurses.lib)
-set(CURSES_INCLUDE_PATH ${3RD_PARTY}/PDCurses)
+set(CURSES_LIBRARY ${3RD_PARTY}/src/PDCurses/wincon/pdcurses.lib)
+set(CURSES_INCLUDE_PATH ${3RD_PARTY}/src/PDCurses)
 
 find_package(Curses REQUIRED)
 include_directories(${CURSES_INCLUDE_DIRS})
+
+set(PDCURSES_ROOT ${3RD_PARTY}/src/PDCurses)
 # ==== END PDCurses ====
 
 # ==== START CUSTOM TARGETS ====
@@ -58,11 +57,12 @@ add_custom_command(TARGET "zip_release"
 # ==== END CUSTOM TARGETS ====
 
 # ==== START TARGETS ====
+
 set(TARGET_LIST pager
                 counter)
 
 foreach(target ${TARGET_LIST})
-    add_subdirectory(${target})
+    add_subdirectory(src/${target})
 endforeach()
 # ==== END TARGETS ====
 

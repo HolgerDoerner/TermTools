@@ -1,2 +1,5 @@
 {
+    "cmake.ctest.parallelJobs": 2,
+    "cmake.generator": "NMake Makefiles",
+    "cmake.configureOnOpen": false
 }
