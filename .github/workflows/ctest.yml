@@ -6,8 +6,6 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Enable Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1.0.0
         with:
@@ -26,7 +24,3 @@ jobs:
       - name: Run CTest
         run: nmake test
         working-directory: .\build
-      - name: C++ code linter (clang-tidy and cppcheck)
-        uses: smay1613/cpp-linter-action@0.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
