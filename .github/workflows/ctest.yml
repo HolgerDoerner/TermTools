@@ -26,5 +26,5 @@ jobs:
         working-directory: .\build
       - name: C++ code linter (clang-tidy and cppcheck)
         uses: smay1613/cpp-linter-action@0.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
