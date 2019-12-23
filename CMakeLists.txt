@@ -54,7 +54,7 @@ add_custom_target("zip_release")
 add_custom_command(TARGET "zip_release"
                     COMMENT "=== 7zip: Package Release Artefact ==="
                     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                    COMMAND 7z a TermTools-Release.zip $ENV{USERPROFILE}/TermTools)               
+                    COMMAND 7z a TermTools-${PROJECT_VERSION}-win32.zip $ENV{USERPROFILE}/TermTools)               
 # ==== END CUSTOM TARGETS ====
 
 # ==== START TARGETS ====
