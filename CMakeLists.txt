@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(TermTools VERSION 0.1.8 LANGUAGES C)
+project(TermTools VERSION 0.1.9 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11)
 
