@@ -1,4 +1,4 @@
-name: TermTools CTest
+name: CTest
 on: [push]
 
 jobs:

@@ -1,4 +1,4 @@
-![](https://github.com/holgerdoerner/TermTools/workflows/TermTools%20CTest/badge.svg) ![](https://github.com/holgerdoerner/TermTools/workflows/TermTools%20CI%20(Release)/badge.svg)
+![](https://github.com/holgerdoerner/TermTools/workflows/CTest/badge.svg) ![](https://github.com/holgerdoerner/TermTools/workflows/Release%20Packaging/badge.svg)
 # TermTools <!-- omit in toc -->
 A collection of tools for the terminal written in C. They are first and foremost aimed for the Windows platform.
 

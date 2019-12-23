@@ -1,5 +1,4 @@
-name: TermTools CI (Release)
-# on: [push]
+name: Release Packaging
 on:
   push:
     tags: 
