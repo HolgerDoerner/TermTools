@@ -27,14 +27,18 @@ jobs:
       - name: Run CTest
         run: nmake test
         working-directory: .\build
-      - name: NMake Install
+      - name: CPack
         if: success()
-        run: nmake install
+        run: nmake package
         working-directory: .\build
-      - name: 7zip Create Release Artefact
-        if: success()
-        run: nmake zip_release
-        working-directory: .\build
+      # - name: NMake Install
+      #   if: success()
+      #   run: nmake install
+      #   working-directory: .\build
+      # - name: 7zip Create Release Artefact
+      #   if: success()
+      #   run: nmake zip_release
+      #   working-directory: .\build
       - name: Create a Release
         id: create_release
         if: success()
