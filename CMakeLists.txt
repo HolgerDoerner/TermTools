@@ -54,7 +54,7 @@ add_custom_target("zip_release")
 add_custom_command(TARGET "zip_release"
                     COMMENT "=== 7zip: Package Release Artefact ==="
                     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                    COMMAND 7z a TermTools-${PROJECT_VERSION}-win32.zip $ENV{USERPROFILE}/TermTools)               
+                    COMMAND 7z a TermTools-Release.zip $ENV{USERPROFILE}/TermTools)               
 # ==== END CUSTOM TARGETS ====
 
 # ==== START TARGETS ====
@@ -75,32 +75,26 @@ install(TARGETS ${TARGET_LIST}
 
 install(FILES LICENSE DESTINATION doc COMPONENT doc)
 install(FILES README.md DESTINATION doc COMPONENT doc)
-# install(DIRECTORY DESTINATION doc COMPONENT doc)
 
-# copy and rename tool specific readme files to
-# ${CMAKE_INSTALL_PREFIX}/doc.
 foreach(target ${TARGET_LIST})
-    # install(CODE "execute_process(COMMAND \${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/${target}/README.md ${CMAKE_INSTALL_PREFIX}/doc/${target}.md)"
-    #         CODE "MESSAGE(STATUS \"Installing: ${target}.md\")"
-    #         COMPONENT doc)
     install(FILES README.md DESTINATION doc/${target} COMPONENT doc)
 endforeach()
 # ==== END INSTALL ====
 
-SET(CPACK_GENERATOR "ZIP")
-SET ( CPACK_PACKAGE_DESCRIPTION_SUMMARY "Tools for the Windows Commandline")
-SET ( CPACK_PACKAGE_VENDOR "Holger Dörner <holger.doerner@gmail.com>")
-SET ( CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
-SET ( CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-SET ( CPACK_PACKAGE_VERSION_MAJOR "0")
-SET ( CPACK_PACKAGE_VERSION_MINOR "1")
-set(CPACK_PACKAGE_VERSION_PATCH "4")
-SET ( CPACK_PACKAGE_CONTACT "Holger Dörner <holger.doerner@gmail.com>")
-SET ( CPACK_PACKAGE_SECTION "Commandline-Tools")
-set(CPACK_ZIP_COMPONENT_INSTALL ON)
-set(CPACK_COMPONENTS_GROUPING ALL_COMPONENTS_IN_ONE)
-include(CPack)
-cpack_add_component(doc REQUIRED)
+# SET(CPACK_GENERATOR "ZIP")
+# SET ( CPACK_PACKAGE_DESCRIPTION_SUMMARY "Tools for the Windows Commandline")
+# SET ( CPACK_PACKAGE_VENDOR "Holger Dörner <holger.doerner@gmail.com>")
+# SET ( CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+# SET ( CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+# SET ( CPACK_PACKAGE_VERSION_MAJOR "0")
+# SET ( CPACK_PACKAGE_VERSION_MINOR "1")
+# set(CPACK_PACKAGE_VERSION_PATCH "4")
+# SET ( CPACK_PACKAGE_CONTACT "Holger Dörner <holger.doerner@gmail.com>")
+# SET ( CPACK_PACKAGE_SECTION "Commandline-Tools")
+# set(CPACK_ZIP_COMPONENT_INSTALL ON)
+# set(CPACK_COMPONENTS_GROUPING ALL_COMPONENTS_IN_ONE)
+# include(CPack)
+# cpack_add_component(doc REQUIRED)
 
 message("General:")
 message("\tCMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
