@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(TermTools VERSION 0.1.4 LANGUAGES C)
+project(TermTools VERSION 0.1.5 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11)
 
@@ -70,19 +70,37 @@ endforeach()
 set(CMAKE_INSTALL_PREFIX "$ENV{USERPROFILE}/TermTools" CACHE PATH "..." FORCE)
 
 install(TARGETS ${TARGET_LIST}
-        CONFIGURATIONS Release)
+        CONFIGURATIONS Release
+        COMPONENT runtime)
 
-install(FILES LICENSE DESTINATION ${CMAKE_INSTALL_PREFIX})
-install(FILES README.md DESTINATION ${CMAKE_INSTALL_PREFIX})
-install(DIRECTORY DESTINATION ${CMAKE_INSTALL_PREFIX}/doc)
+install(FILES LICENSE DESTINATION doc COMPONENT doc)
+install(FILES README.md DESTINATION doc COMPONENT doc)
+# install(DIRECTORY DESTINATION doc COMPONENT doc)
 
 # copy and rename tool specific readme files to
 # ${CMAKE_INSTALL_PREFIX}/doc.
 foreach(target ${TARGET_LIST})
-    install(CODE "execute_process(COMMAND \${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/${target}/README.md ${CMAKE_INSTALL_PREFIX}/doc/${target}.md)"
-            CODE "MESSAGE(STATUS \"Installing: ${CMAKE_INSTALL_PREFIX}/doc/${target}.md\")")
+    # install(CODE "execute_process(COMMAND \${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/${target}/README.md ${CMAKE_INSTALL_PREFIX}/doc/${target}.md)"
+    #         CODE "MESSAGE(STATUS \"Installing: ${target}.md\")"
+    #         COMPONENT doc)
+    install(FILES README.md DESTINATION doc/${target} COMPONENT doc)
 endforeach()
 # ==== END INSTALL ====
+
+SET(CPACK_GENERATOR "ZIP")
+SET ( CPACK_PACKAGE_DESCRIPTION_SUMMARY "Tools for the Windows Commandline")
+SET ( CPACK_PACKAGE_VENDOR "Holger Dörner <holger.doerner@gmail.com>")
+SET ( CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+SET ( CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+SET ( CPACK_PACKAGE_VERSION_MAJOR "0")
+SET ( CPACK_PACKAGE_VERSION_MINOR "1")
+set(CPACK_PACKAGE_VERSION_PATCH "4")
+SET ( CPACK_PACKAGE_CONTACT "Holger Dörner <holger.doerner@gmail.com>")
+SET ( CPACK_PACKAGE_SECTION "Commandline-Tools")
+set(CPACK_ZIP_COMPONENT_INSTALL ON)
+set(CPACK_COMPONENTS_GROUPING ALL_COMPONENTS_IN_ONE)
+include(CPack)
+cpack_add_component(doc REQUIRED)
 
 message("General:")
 message("\tCMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")

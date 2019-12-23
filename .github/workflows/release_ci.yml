@@ -53,6 +53,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./TermTools-Release.zip
-          asset_name: TermTools-Release.zip
+          asset_path: ./build/TermTools-[0-9].[0-9].[0-9]-win32.zip
+          # asset_name: TermTools-Release.zip
           asset_content_type: application/zip

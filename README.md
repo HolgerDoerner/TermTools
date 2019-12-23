@@ -14,8 +14,10 @@ A collection of tools for the terminal written in C. They are first and foremost
 # About
 
 # Included Tools
-- [pager](pager/README.md) - A terminal pager. More like less...
-- [counter](counter/README.md) - A simple counter. Counts lines or words in text-files.
+NAME | DESCRIPTION
+--- | ---
+pager | A terminal pager. More like less...
+counter | A simple counter. Counts lines or words in text-files.
 
 # Build
 ## Requirements
