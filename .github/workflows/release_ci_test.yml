@@ -1,0 +1,60 @@
+name: Release Packaging TEST
+on:
+  [push]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Enable Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1.0.0
+        with:
+          arch: x64
+          # Windows SDK number to build for
+          # sdk:
+          # Enable Specre mitigations
+          # spectre:
+          # VC++ compiler toolset version
+          toolset: 14.24
+      - name: Configure CMake (Release)
+        run: cmake -DCMAKE_BUILD_TYPE=Release -G"NMake Makefiles" -B .\build
+      - name: Run NMAKE
+        run: nmake
+        working-directory: .\build
+      - name: Run CTest
+        run: nmake test
+        working-directory: .\build
+      # - name: CPack
+      #   if: success()
+      #   run: nmake package
+      #   working-directory: .\build
+      - name: NMake Install
+        if: success()
+        run: nmake install
+        working-directory: .\build
+      - name: 7zip Create Release Artefact
+        if: success()
+        run: nmake zip_release
+        working-directory: .\build
+      - name: Create a Release
+        id: create_release
+        if: success()
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload a Release Asset
+        if: success()
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/$(shell ls ./build/*.zip)
+          asset_name: $(shell ls ./build/*.zip)
+          asset_content_type: application/zip
