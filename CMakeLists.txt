@@ -57,18 +57,31 @@ add_custom_command(TARGET "zip_release"
                     COMMAND 7z a TermTools-Release.zip $ENV{USERPROFILE}/TermTools)               
 # ==== END CUSTOM TARGETS ====
 
-# targets
-add_subdirectory(pager)
-add_subdirectory(counter)
+# ==== START TARGETS ====
+set(TARGET_LIST pager
+                counter)
+
+foreach(target ${TARGET_LIST})
+    add_subdirectory(${target})
+endforeach()
+# ==== END TARGETS ====
 
 # ==== START INSTALL ====
 set(CMAKE_INSTALL_PREFIX "$ENV{USERPROFILE}/TermTools" CACHE PATH "..." FORCE)
 
-install(TARGETS pager counter
+install(TARGETS ${TARGET_LIST}
         CONFIGURATIONS Release)
 
 install(FILES LICENSE DESTINATION ${CMAKE_INSTALL_PREFIX})
 install(FILES README.md DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(DIRECTORY DESTINATION ${CMAKE_INSTALL_PREFIX}/doc)
+
+# copy and rename tool specific readme files to
+# ${CMAKE_INSTALL_PREFIX}/doc.
+foreach(target ${TARGET_LIST})
+    install(CODE "execute_process(COMMAND \${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/${target}/README.md ${CMAKE_INSTALL_PREFIX}/doc/${target}.md)"
+            CODE "MESSAGE(STATUS \"Installing: ${CMAKE_INSTALL_PREFIX}/doc/${target}.md\")")
+endforeach()
 # ==== END INSTALL ====
 
 message("General:")
