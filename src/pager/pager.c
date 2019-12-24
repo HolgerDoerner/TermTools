@@ -287,7 +287,9 @@ void cleanup()
     }
 
     free(screenBuff);
+    free(fileName);
     screenBuff = NULL;
+    fileName = NULL;
 }
 
 void version()
