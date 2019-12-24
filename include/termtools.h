@@ -16,11 +16,13 @@
  * RETURNS: a pointer to the start of the last element
  *           or NULL.
  */
-char *basename(const char *path)
+const char *basename(const char *path)
 {
     // if (!path) return NULL;
     int pathsep = '\\'; //sorry, Windows only...
-    return strrchr(path, pathsep);
+    const char *tmp = strrchr(path, pathsep);
+    if (tmp) return tmp + 1;
+    else return tmp;
 }
 
 

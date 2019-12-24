@@ -81,7 +81,7 @@ int main(int argc, char **argv)
         }
 
         char *tmp = basename(argv[1]);
-        if (tmp) fileName = ++tmp;
+        if (tmp) fileName = tmp;
         else
         {
             size_t len = strlen(argv[1]) + 1;
