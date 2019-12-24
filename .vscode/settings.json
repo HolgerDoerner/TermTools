@@ -1,5 +1,8 @@
 {
     "cmake.ctest.parallelJobs": 2,
     "cmake.generator": "NMake Makefiles",
-    "cmake.configureOnOpen": false
+    "cmake.configureOnOpen": false,
+    "files.associations": {
+        "curses.h": "c"
+    }
 }

@@ -36,6 +36,8 @@
 
 #include <curses.h>
 
+#include "termtools.h"
+
 #define TOP 0
 #define BOTTOM 1
 #define TRUE 1
@@ -50,7 +52,7 @@ int sbCount = 0;
 FILE *pFile;
 WINDOW *term;
 short isStdinRedirected = FALSE;
-char fileName[40];
+char *fileName;
 /* END (global vars) */
 
 void scrollUp(const int);
@@ -78,7 +80,19 @@ int main(int argc, char **argv)
             exit(0);
         }
 
-        snprintf(fileName, strlen(argv[1])+1, "%s", argv[1]);
+        char *tmp = basename(argv[1]);
+        if (tmp) fileName = ++tmp;
+        else
+        {
+            size_t len = strlen(argv[1]) + 1;
+            fileName = malloc(len);
+            if (!fileName)
+            {
+                perror("* ERROR");
+                return(EXIT_FAILURE);
+            }
+            snprintf(fileName, len, "%s", argv[1]);
+        }
 
         pFile = fopen(argv[1], "r");
         if (pFile == NULL)
@@ -88,8 +102,14 @@ int main(int argc, char **argv)
     }
     else
     {
-        char tmp[] = "pipe";
-        snprintf(fileName, strlen(tmp)+1, "%s", tmp);
+        char name[] = "pipe";
+        fileName = malloc(strlen(name));
+        if (!fileName)
+        {
+            perror("* ERROR");
+            return(EXIT_FAILURE);
+        }
+        snprintf(fileName, strlen(name)+1, "%s", name);
         pFile = stdin;
         isStdinRedirected = TRUE;
     }
@@ -117,7 +137,7 @@ int main(int argc, char **argv)
             if (screenBuff == NULL)
             {
                 perror("* ERROR");
-                exit(1);
+                exit(EXIT_FAILURE);
             }
         }
     }
@@ -125,7 +145,7 @@ int main(int argc, char **argv)
     if (!isStdinRedirected && fclose(pFile))
     {
         perror("* ERROR");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     else
     {
@@ -251,9 +271,11 @@ void updateStatusLine()
     wmove(term, LINES-1, 0);
     wclrtoeol(term);
 
-    char tmp[80];
-    snprintf(tmp, strlen(tmp), "--- %s: %d of %d ---", fileName, lineCount, sbCount);
-    mvwaddstr(term, LINES-1, 0, tmp);
+    char *status;
+    status = malloc(getmaxx(term) - 1);
+    snprintf(status, strlen(status), "--- %s: %d of %d ---", fileName, lineCount, sbCount);
+    mvwaddstr(term, LINES-1, 0, status);
+    free(status);
 }
 
 void cleanup()
