@@ -272,8 +272,10 @@ void updateStatusLine()
     wclrtoeol(term);
 
     char *status;
-    status = malloc(getmaxx(term) - 1);
-    snprintf(status, strlen(status), "--- %s: %d of %d ---", fileName, lineCount, sbCount);
+    size_t barSize = sizeof(chtype) * getmaxx(term);
+
+    status = malloc(barSize);
+    snprintf(status, barSize-1, "--- %s: %d of %d ---", fileName, lineCount, sbCount);
     mvwaddstr(term, LINES-1, 0, status);
     free(status);
 }
