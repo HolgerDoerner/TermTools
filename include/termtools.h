@@ -61,6 +61,16 @@ char *basename(const char *path)
     else return tmp;
 }
 
+unsigned int countDigits(int number)
+{
+    unsigned int count = 1;
 
+    if (number >= 10)
+    {
+        while (number /= 10) ++count;
+    }
+    
+    return count;
+}
 
 #endif // _TERMTOOLS_H

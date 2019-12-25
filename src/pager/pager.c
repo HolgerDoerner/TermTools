@@ -79,7 +79,7 @@ FILE *pFile = NULL;
 WINDOW *term = NULL;
 short isStdinRedirected = FALSE;
 unsigned short showLineNum = FALSE;
-int digitCount = 1;
+unsigned int digitCount = 1;
 char *fileName = NULL;
 /* END (global vars) */
 
@@ -87,7 +87,6 @@ void scrollUp(const int);
 void scrollDown(const int);
 void gotoStartEnd(const int);
 void updateStatusLine(void);
-void countDigits(int);
 void showHelp(void);
 void cleanup(void);
 void version(void);
@@ -201,7 +200,7 @@ int main(int argc, char **argv)
     init_pair(2, COLOR_BLACK, COLOR_WHITE);
     init_pair(3, COLOR_BLACK, COLOR_MAGENTA);
 
-    countDigits(sbCount);
+    digitCount = countDigits(sbCount);
 
     for (; lineCount <= (LINES - 2); ++lineCount)
     {
@@ -325,19 +324,6 @@ void updateStatusLine()
     mvwaddnstr(term, LINES-1, 0, status, COLS);
     wattron(term, COLOR_PAIR(1));
     free(status);
-}
-
-void countDigits(int number)
-{
-    if (number < 10)
-    {
-        return;
-    }
-    else
-    {
-        while ((number /= 10)) ++digitCount;
-    }
-    
 }
 
 void showHelp()
