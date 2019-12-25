@@ -59,6 +59,7 @@ void scrollUp(const int);
 void scrollDown(const int);
 void gotoStartEnd(const int);
 void updateStatusLine(void);
+void showHelp(void);
 void cleanup(void);
 void version(void);
 void help(void);
@@ -84,8 +85,9 @@ int main(int argc, char **argv)
         if (tmp) fileName = tmp;
         else
         {
-            size_t len = strlen(argv[1]) + 1;
-            fileName = malloc(len);
+            // size_t len = strlen(argv[1]) + 1;
+            size_t len = sizeof(chtype) * strlen(argv[1]);
+            fileName = malloc(len + 1);
             if (!fileName)
             {
                 perror("* ERROR");
@@ -103,13 +105,15 @@ int main(int argc, char **argv)
     else
     {
         char name[] = "pipe";
-        fileName = malloc(strlen(name));
+        // fileName = malloc(strlen(name));
+        size_t len = sizeof(chtype) * strlen(name);
+        fileName = malloc(len + 1);
         if (!fileName)
         {
             perror("* ERROR");
             return(EXIT_FAILURE);
         }
-        snprintf(fileName, strlen(name)+1, "%s", name);
+        snprintf(fileName, len, "%s", name);
         pFile = stdin;
         isStdinRedirected = TRUE;
     }
@@ -153,17 +157,22 @@ int main(int argc, char **argv)
     }
     
     term = initscr();
-    curs_set(0);
+    start_color();
     raw();
     keypad(term, TRUE);
     scrollok(term, TRUE);
     noecho();
     nonl();
+    curs_set(0);
+
+    init_pair(1, COLOR_WHITE, COLOR_BLACK);
+    init_pair(2, COLOR_BLACK, COLOR_WHITE);
+    init_pair(3, COLOR_BLACK, COLOR_MAGENTA);
 
     for (; lineCount <= (LINES - 2); ++lineCount)
     {
         wscrl(term, 1);
-        mvwaddstr(term, LINES-2, 0, screenBuff[lineCount]);
+        mvwaddnstr(term, LINES-2, 0, screenBuff[lineCount], COLS);
     }
 
     updateStatusLine();
@@ -176,25 +185,28 @@ int main(int argc, char **argv)
         switch (getch())
         {
             case VK_ESCAPE: case 'q': isRunning = FALSE; break;
-            case KEY_DOWN: case VK_DOWN: case KEY_C2: case 'j':
+            case KEY_ENTER: case VK_RETURN: case KEY_DOWN: case VK_DOWN: case 'j':
                 scrollDown(1); break;
-            case KEY_UP: case VK_UP: case KEY_A2: case 'k':
+            case KEY_UP: case VK_UP: case 'k':
                 scrollUp(1); break;
-            case KEY_NPAGE: case VK_NEXT: case 457: case 'h':
+            case KEY_NPAGE: case VK_NEXT: case ' ':
                 scrollDown(LINES); break;
-            case KEY_PPAGE: case VK_PRIOR: case 451: case 'l':
+            case KEY_PPAGE: case VK_PRIOR: case 'b':
                 scrollUp(LINES); break;
-            case KEY_HOME: case VK_HOME: case 449: case 'b':
-                gotoStartEnd(0); break;
-            case KEY_END: case VK_END: case 455: case 'e':
-                gotoStartEnd(1); break;
+            case KEY_HOME: case VK_HOME: case 449: case 'g':
+                gotoStartEnd(TOP); break;
+            case KEY_END: case VK_END: case 455: case 'G':
+                gotoStartEnd(BOTTOM); break;
+            case 'v':
+                system(fileName); isRunning = FALSE; break;
+            case '?':
+                showHelp(); break;
             // for now, just exit on resize
             case KEY_RESIZE: isRunning = FALSE; break;
             default: break;
         }
     }
 
-    endwin();
     cleanup();
     return 0;
 }
@@ -208,7 +220,7 @@ void scrollUp(const int range)
         if (lineCount >= 0)
         {
             wscrl(term, -1);
-            mvwaddstr(term, 0, 0, screenBuff[lineCount--]);
+            mvwaddnstr(term, 0, 0, screenBuff[lineCount--], COLS);
             wrefresh(term);
         }
         else
@@ -231,7 +243,7 @@ void scrollDown(const int range)
         if (lineCount < sbCount)
         {
             wscrl(term, 1);
-            mvwaddstr(term, LINES-2, 0, screenBuff[lineCount++]);
+            mvwaddnstr(term, LINES-2, 0, screenBuff[lineCount++], COLS);
             wrefresh(term);
         }
         else
@@ -259,7 +271,7 @@ void gotoStartEnd(const int direction)
     for (int i = 0; i < (direction ? LINES : LINES-1); ++i)
     {
         wscrl(term, 1);
-        mvwaddstr(term, LINES-2, 0, screenBuff[lineCount++]);
+        mvwaddnstr(term, LINES-2, 0, screenBuff[lineCount++], COLS);
         wrefresh(term);
     }
 
@@ -272,16 +284,40 @@ void updateStatusLine()
     wclrtoeol(term);
 
     char *status;
-    size_t barSize = sizeof(chtype) * getmaxx(term);
+    size_t barSize = sizeof(chtype) * COLS;
 
     status = malloc(barSize);
     snprintf(status, barSize-1, "--- %s: %d of %d ---", fileName, lineCount, sbCount);
+    wattron(term, COLOR_PAIR(2));
     mvwaddstr(term, LINES-1, 0, status);
+    wattron(term, COLOR_PAIR(1));
     free(status);
+
+    wrefresh(term);
+}
+
+void showHelp()
+{
+    wmove(term, LINES-1, 0);
+    wclrtoeol(term);
+
+    char *help;
+    size_t barSize = sizeof(chtype) * COLS;
+
+    help = malloc(barSize);
+    snprintf(help, barSize-1, "??? ENTER, j: DOWN - k: LINE_UP - SPACE: PAGE_DOWN - b: PAGE_UP - g: TOP - G: END - q: EXIT ???");
+    wattron(term, COLOR_PAIR(3));
+    mvwaddstr(term, LINES-1, 0, help);
+    wattron(term, COLOR_PAIR(1));
+    free(help);
+    wrefresh(term); 
 }
 
 void cleanup()
 {
+    endwin();
+    delwin(term);
+
     for (int i = 0; i < (BUFSIZ * allocCount); ++i)
     {
         free(screenBuff[i]);
@@ -307,12 +343,14 @@ void help()
     printf("    type <filename> | pager.exe\n");
     printf("\n");
     printf("Controls:\n");
-    printf("    ARROW_UP, K    = scroll 1 line up\n");
-    printf("    ARROW_DOWN, J  = scroll 1 line down\n");
-    printf("    PG_UP, l       = scroll 1 page up\n");
-    printf("    PG_DOWN, h     = scroll 1 page down\n");
-    printf("    HOME           = jump to the beginning\n");
-    printf("    END            = jump to the end\n");
-    printf("    ESC, q         = exit\n");
+    printf("    j, ENTER, ARROW_DOWN    = scroll 1 line down\n");
+    printf("    k, ARROW_UP             = scroll 1 line up\n");
+    printf("    SPACE, PG_DOWN          = scroll 1 page down\n");
+    printf("    b, PG_UP                = scroll 1 page up\n");
+    printf("    g, HOME                 = jump to the beginning\n");
+    printf("    G, END                  = jump to the end\n");
+    printf("    v                       = show file in editor (exit pager)\n");
+    printf("    ?                       = help\n");
+    printf("    q                       = exit\n");
     printf("\n");
 }
