@@ -23,3 +23,4 @@ If a filename is given, it will be read. Otherwise pager.exe trys to read from '
 ## Known Bugs/Missing Features
 - lines longer than the with of the terminal are cut off, no linewrapping or horizontal scrolling atm...
 - no handling of terminal resizing, the application just exits if it detects resizing of the terminal.
+- crashes if input < than terminal hight.

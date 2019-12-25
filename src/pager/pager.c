@@ -289,7 +289,7 @@ void updateStatusLine()
     status = malloc(barSize);
     snprintf(status, barSize-1, "--- %s: %d of %d ---", fileName, lineCount, sbCount);
     wattron(term, COLOR_PAIR(2));
-    mvwaddstr(term, LINES-1, 0, status);
+    mvwaddnstr(term, LINES-1, 0, status, COLS);
     wattron(term, COLOR_PAIR(1));
     free(status);
 
@@ -307,7 +307,7 @@ void showHelp()
     help = malloc(barSize);
     snprintf(help, barSize-1, "??? ENTER, j: DOWN - k: LINE_UP - SPACE: PAGE_DOWN - b: PAGE_UP - g: TOP - G: END - q: EXIT ???");
     wattron(term, COLOR_PAIR(3));
-    mvwaddstr(term, LINES-1, 0, help);
+    mvwaddnstr(term, LINES-1, 0, help, COLS);
     wattron(term, COLOR_PAIR(1));
     free(help);
     wrefresh(term); 
