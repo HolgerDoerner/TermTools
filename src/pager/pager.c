@@ -1,8 +1,33 @@
 /*
+ * -----------------------------------------------------------------------
+ * This is free and unencumbered software released into the public domain.
+ * 
+ * Anyone is free to copy, modify, publish, use, compile, sell, or
+ * distribute this software, either in source code form or as a compiled
+ * binary, for any purpose, commercial or non-commercial, and by any
+ * means.
+ * 
+ * In jurisdictions that recognize copyright laws, the author or authors
+ * of this software dedicate any and all copyright interest in the
+ * software to the public domain. We make this dedication for the benefit
+ * of the public at large and to the detriment of our heirs and
+ * successors. We intend this dedication to be an overt act of
+ * relinquishment in perpetuity of all present and future rights to this
+ * software under copyright law.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ * 
+ * For more information, please refer to <https://unlicense.org>
+ * -----------------------------------------------------------------------
+ * 
  * pager - a simple terminal pager
  * 
- * Version: 0.5.0
- * Date: 2019-12-20
  * Author: Holger Dörner <holger.doerner@gmail.com>
  * 
  * This application is part of the 'TermTools'-project.
@@ -21,6 +46,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
+#include <math.h>
 
 #ifdef MOUSE_MOVED
     #undef MOUSE_MOVED
@@ -46,19 +72,22 @@
 /* global vars */
 int lineCount = 0;
 char inBuf[BUFSIZ];
-char **screenBuff;
+char **screenBuff = NULL;
 int allocCount = 1;
 int sbCount = 0;
-FILE *pFile;
-WINDOW *term;
+FILE *pFile = NULL;
+WINDOW *term = NULL;
 short isStdinRedirected = FALSE;
-char *fileName;
+unsigned short showLineNum = FALSE;
+int digitCount = 1;
+char *fileName = NULL;
 /* END (global vars) */
 
 void scrollUp(const int);
 void scrollDown(const int);
 void gotoStartEnd(const int);
 void updateStatusLine(void);
+void countDigits(int);
 void showHelp(void);
 void cleanup(void);
 void version(void);
@@ -80,12 +109,15 @@ int main(int argc, char **argv)
             version();
             exit(0);
         }
+        else if (argc == 3 && _stricmp(argv[2], "/n") == 0)
+        {
+            showLineNum = TRUE;
+        }
 
         char *tmp = basename(argv[1]);
         if (tmp) fileName = tmp;
         else
         {
-            // size_t len = strlen(argv[1]) + 1;
             size_t len = sizeof(chtype) * strlen(argv[1]);
             fileName = malloc(len + 1);
             if (!fileName)
@@ -105,7 +137,6 @@ int main(int argc, char **argv)
     else
     {
         char name[] = "pipe";
-        // fileName = malloc(strlen(name));
         size_t len = sizeof(chtype) * strlen(name);
         fileName = malloc(len + 1);
         if (!fileName)
@@ -129,8 +160,9 @@ int main(int argc, char **argv)
             exit(1);
         }
 
-        snprintf(screenBuff[sbCount++], BUFSIZ, "%s", inBuf);
-
+        // storing the linenumber within the string
+        // sneaky, sneaky...
+        snprintf(screenBuff[sbCount++], BUFSIZ, "%5d: %s", sbCount, inBuf);
 
         if (feof(pFile)) break;
 
@@ -169,14 +201,16 @@ int main(int argc, char **argv)
     init_pair(2, COLOR_BLACK, COLOR_WHITE);
     init_pair(3, COLOR_BLACK, COLOR_MAGENTA);
 
+    countDigits(sbCount);
+
     for (; lineCount <= (LINES - 2); ++lineCount)
     {
         wscrl(term, 1);
-        mvwaddnstr(term, LINES-2, 0, screenBuff[lineCount], COLS);
+        mvwaddnstr(term, LINES-2, 0, screenBuff[lineCount] + (showLineNum ? (5-digitCount) : 7), COLS);
     }
 
     updateStatusLine();
-    // reDrawScreen(); // need fix
+    wrefresh(term);
 
     // main loop
     int isRunning = TRUE;
@@ -205,6 +239,8 @@ int main(int argc, char **argv)
             case KEY_RESIZE: isRunning = FALSE; break;
             default: break;
         }
+
+        wrefresh(term);
     }
 
     cleanup();
@@ -220,8 +256,7 @@ void scrollUp(const int range)
         if (lineCount >= 0)
         {
             wscrl(term, -1);
-            mvwaddnstr(term, 0, 0, screenBuff[lineCount--], COLS);
-            wrefresh(term);
+            mvwaddnstr(term, 0, 0, screenBuff[lineCount--] + (showLineNum ? (5-digitCount) : 7), COLS);
         }
         else
         {
@@ -243,8 +278,7 @@ void scrollDown(const int range)
         if (lineCount < sbCount)
         {
             wscrl(term, 1);
-            mvwaddnstr(term, LINES-2, 0, screenBuff[lineCount++], COLS);
-            wrefresh(term);
+            mvwaddnstr(term, LINES-2, 0, screenBuff[lineCount++] + (showLineNum ? (5-digitCount) : 7), COLS);
         }
         else
         {
@@ -271,8 +305,7 @@ void gotoStartEnd(const int direction)
     for (int i = 0; i < (direction ? LINES : LINES-1); ++i)
     {
         wscrl(term, 1);
-        mvwaddnstr(term, LINES-2, 0, screenBuff[lineCount++], COLS);
-        wrefresh(term);
+        mvwaddnstr(term, LINES-2, 0, screenBuff[lineCount++] + (showLineNum ? (5-digitCount) : 7), COLS);
     }
 
     updateStatusLine();
@@ -287,13 +320,24 @@ void updateStatusLine()
     size_t barSize = sizeof(chtype) * COLS;
 
     status = malloc(barSize);
-    snprintf(status, barSize-1, "--- %s: %d of %d ---", fileName, lineCount, sbCount);
+    snprintf(status, barSize-1, " %s: %d of %d (%d%%) ", fileName, lineCount, sbCount, (100 * lineCount / sbCount));
     wattron(term, COLOR_PAIR(2));
     mvwaddnstr(term, LINES-1, 0, status, COLS);
     wattron(term, COLOR_PAIR(1));
     free(status);
+}
 
-    wrefresh(term);
+void countDigits(int number)
+{
+    if (number < 10)
+    {
+        return;
+    }
+    else
+    {
+        while ((number /= 10)) ++digitCount;
+    }
+    
 }
 
 void showHelp()
@@ -305,12 +349,11 @@ void showHelp()
     size_t barSize = sizeof(chtype) * COLS;
 
     help = malloc(barSize);
-    snprintf(help, barSize-1, "??? ENTER, j: DOWN - k: LINE_UP - SPACE: PAGE_DOWN - b: PAGE_UP - g: TOP - G: END - q: EXIT ???");
+    snprintf(help, barSize-1, " ENTER, j: DOWN - k: LINE_UP - SPACE: PAGE_DOWN - b: PAGE_UP - g: TOP - G: END - q: EXIT ");
     wattron(term, COLOR_PAIR(3));
     mvwaddnstr(term, LINES-1, 0, help, COLS);
     wattron(term, COLOR_PAIR(1));
-    free(help);
-    wrefresh(term); 
+    free(help); 
 }
 
 void cleanup()
