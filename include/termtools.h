@@ -67,9 +67,9 @@ char *basename(const char *path)
  * 
  * RETURNS: the number of digits, minimum 1
  */
-unsigned int countDigits(int number)
+unsigned short countDigits(long long number)
 {
-    unsigned int count = 1;
+    unsigned short count = 1;
 
     if (number >= 10)
     {

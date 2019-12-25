@@ -70,48 +70,58 @@
 #define FALSE 0
 
 /* global vars */
-int lineCount = 0;
-char inBuf[BUFSIZ];
-char **screenBuff = NULL;
-int allocCount = 1;
-int sbCount = 0;
-FILE *pFile = NULL;
+long lineCount = 0;
 WINDOW *term = NULL;
-short isStdinRedirected = FALSE;
 unsigned short showLineNum = FALSE;
-unsigned int digitCount = 1;
+unsigned short digitCount = 1;
 char *fileName = NULL;
 /* END (global vars) */
 
-void scrollUp(const int);
-void scrollDown(const int);
-void gotoStartEnd(const int);
-void updateStatusLine(void);
+struct SETTINGS
+{
+    long lineCount;
+    WINDOW *term;
+    unsigned short showLineNum;
+    unsigned short digitCount;
+    char *fileName;
+    char **screenBuff;
+    size_t sbCount;
+};
+
+
+void parseArgs(int, char **);
+long fillScreenBuffer(char ***, FILE **);
+void scrollUp(char **, const int);
+void scrollDown(char **, long, const int);
+void gotoStartEnd(char **, long, const int);
+void updateStatusLine(long);
 void showHelp(void);
-void cleanup(void);
+void cleanup(char ***, long);
 void version(void);
 void help(void);
 
 int main(int argc, char **argv)
 {
     setlocale(LC_ALL, "");
+
+    struct SETTINGS settings = {
+        .lineCount = 0,
+        .term = NULL,
+        .showLineNum = FALSE,
+        .digitCount = 1,
+        .fileName = NULL,
+        .screenBuff = NULL,
+        .sbCount = 0
+    };
+
+    char **screenBuff = NULL;
+    long sbCount = 0;
+    FILE *pFile = NULL;
+    short isStdinRedirected = FALSE;
     
     if (argc >= 2)
     {
-        if (_stricmp(argv[1], "/?") == 0)
-        {
-            help();
-            exit(0);
-        }
-        else if (_stricmp(argv[1], "/v") == 0)
-        {
-            version();
-            exit(0);
-        }
-        else if (argc == 3 && _stricmp(argv[2], "/n") == 0)
-        {
-            showLineNum = TRUE;
-        }
+        parseArgs(argc, argv);
 
         char *tmp = basename(argv[1]);
         if (tmp) fileName = tmp;
@@ -148,34 +158,7 @@ int main(int argc, char **argv)
         isStdinRedirected = TRUE;
     }
 
-    screenBuff = (char **)malloc(sizeof(char *) * (BUFSIZ * allocCount));
-
-    while (fgets(inBuf, BUFSIZ, pFile))
-    {
-        screenBuff[sbCount] = (char *)malloc(sizeof(char) * BUFSIZ);
-        if (screenBuff[sbCount] == NULL)
-        {
-            perror("* ERROR");
-            exit(1);
-        }
-
-        // storing the linenumber within the string
-        // sneaky, sneaky...
-        snprintf(screenBuff[sbCount++], BUFSIZ, "%7d: %s", sbCount, inBuf);
-
-        if (feof(pFile)) break;
-
-        if ((sbCount > 0) && ((sbCount % BUFSIZ) == 0))
-        {
-            screenBuff = (char **)realloc(screenBuff, sizeof(char *) * (BUFSIZ * ++allocCount));
-
-            if (screenBuff == NULL)
-            {
-                perror("* ERROR");
-                exit(EXIT_FAILURE);
-            }
-        }
-    }
+    sbCount = fillScreenBuffer(&screenBuff, &pFile);
 
     if (!isStdinRedirected && fclose(pFile))
     {
@@ -208,7 +191,7 @@ int main(int argc, char **argv)
         mvwaddnstr(term, LINES-2, 0, screenBuff[lineCount] + (showLineNum ? (7-digitCount) : 9), COLS);
     }
 
-    updateStatusLine();
+    updateStatusLine(sbCount);
     wrefresh(term);
 
     // main loop
@@ -219,19 +202,19 @@ int main(int argc, char **argv)
         {
             case VK_ESCAPE: case 'q': isRunning = FALSE; break;
             case KEY_ENTER: case VK_RETURN: case KEY_DOWN: case VK_DOWN: case 'j':
-                scrollDown(1); break;
+                scrollDown(screenBuff, sbCount, 1); updateStatusLine(sbCount); break;
             case KEY_UP: case VK_UP: case 'k':
-                scrollUp(1); break;
+                scrollUp(screenBuff, 1); updateStatusLine(sbCount); break;
             case KEY_NPAGE: case VK_NEXT: case ' ':
-                scrollDown(LINES); break;
+                scrollDown(screenBuff, sbCount, LINES); updateStatusLine(sbCount); break;
             case KEY_PPAGE: case VK_PRIOR: case 'b':
-                scrollUp(LINES); break;
+                scrollUp(screenBuff, LINES); updateStatusLine(sbCount); break;
             case KEY_HOME: case VK_HOME: case 449: case 'g':
-                gotoStartEnd(TOP); break;
+                gotoStartEnd(screenBuff, sbCount, TOP); updateStatusLine(sbCount); break;
             case KEY_END: case VK_END: case 455: case 'G':
-                gotoStartEnd(BOTTOM); break;
+                gotoStartEnd(screenBuff, sbCount, BOTTOM); updateStatusLine(sbCount); break;
             case 'v':
-                system(fileName); isRunning = FALSE; break;
+                system(argv[1]); isRunning = FALSE; break;
             case '?':
                 showHelp(); break;
             // for now, just exit on resize
@@ -242,11 +225,69 @@ int main(int argc, char **argv)
         wrefresh(term);
     }
 
-    cleanup();
+    // cleanup(&screenBuff, sbCount);
     return 0;
 }
 
-void scrollUp(const int range)
+void parseArgs(int argc, char **argv)
+{
+    if (_stricmp(argv[1], "/?") == 0)
+        {
+            help();
+            exit(0);
+        }
+        else if (_stricmp(argv[1], "/v") == 0)
+        {
+            version();
+            exit(0);
+        }
+        else if (argc == 3 && _stricmp(argv[2], "/n") == 0)
+        {
+            showLineNum = TRUE;
+        }
+}
+
+long fillScreenBuffer(char ***screenBuff, FILE **pFile)
+{
+    if (!screenBuff || !pFile) return 0;
+
+    long sbCount = 0;
+    unsigned int allocCount = 1;
+    char inBuf[BUFSIZ];
+
+    *screenBuff = malloc(sizeof(char *) * BUFSIZ);
+
+    while (fgets(inBuf, BUFSIZ, *pFile))
+    {
+        (*screenBuff)[sbCount] = malloc(sizeof(char) * BUFSIZ);
+        if ((*screenBuff)[sbCount] == NULL)
+        {
+            perror("* ERROR");
+            exit(1);
+        }
+
+        // storing the linenumber within the string
+        // sneaky, sneaky...
+        int ret = snprintf((*screenBuff)[sbCount++], BUFSIZ, "%7ld: %s", sbCount, inBuf);
+
+        if (feof(*pFile)) break;
+
+        if ((sbCount > 0) && ((sbCount % BUFSIZ) == 0))
+        {
+            *screenBuff = realloc(*screenBuff, sizeof(char *) * (BUFSIZ * ++allocCount));
+
+            if (*screenBuff == NULL)
+            {
+                perror("* ERROR");
+                exit(EXIT_FAILURE);
+            }
+        }
+    }
+
+    return sbCount;
+}
+
+void scrollUp(char **screenBuff, const int range)
 {
     lineCount -= LINES;
 
@@ -266,11 +307,9 @@ void scrollUp(const int range)
     }
 
     lineCount += LINES;
-
-    updateStatusLine();
 }
 
-void scrollDown(const int range)
+void scrollDown(char **screenBuff, long sbCount, const int range)
 {
     for (int i = 0; i < range; ++i)
     {
@@ -286,11 +325,9 @@ void scrollDown(const int range)
             break;
         }
     }
-
-    updateStatusLine();
 }
 
-void gotoStartEnd(const int direction)
+void gotoStartEnd(char **screenBuff, long sbCount, const int direction)
 {
     if ( ((lineCount == LINES-1) & (direction == TOP))
         || ((lineCount == sbCount) & (direction == BOTTOM)) )
@@ -306,11 +343,9 @@ void gotoStartEnd(const int direction)
         wscrl(term, 1);
         mvwaddnstr(term, LINES-2, 0, screenBuff[lineCount++] + (showLineNum ? (7-digitCount) : 9), COLS);
     }
-
-    updateStatusLine();
 }
 
-void updateStatusLine()
+void updateStatusLine(long sbCount)
 {
     wmove(term, LINES-1, 0);
     wclrtoeol(term);
@@ -319,7 +354,7 @@ void updateStatusLine()
     size_t barSize = sizeof(chtype) * COLS;
 
     status = malloc(barSize);
-    snprintf(status, barSize-1, " %s: %d of %d (%d%%) ", fileName, lineCount, sbCount, (100 * lineCount / sbCount));
+    snprintf(status, barSize-1, " %s: %ld of %ld (%3ld%%) ", fileName, lineCount, sbCount, (100 * lineCount / sbCount));
     wattron(term, COLOR_PAIR(2));
     mvwaddnstr(term, LINES-1, 0, status, COLS);
     wattron(term, COLOR_PAIR(1));
@@ -342,20 +377,20 @@ void showHelp()
     free(help); 
 }
 
-void cleanup()
+void cleanup(char ***screenBuff, long sbCount)
 {
     endwin();
     delwin(term);
 
-    for (int i = 0; i < (BUFSIZ * allocCount); ++i)
+    for (int i = 0; i < sbCount; ++i)
     {
-        free(screenBuff[i]);
+        free((*screenBuff)[i]);
         screenBuff[i] = NULL;
     }
 
-    free(screenBuff);
+    free(*screenBuff);
     free(fileName);
-    screenBuff = NULL;
+    *screenBuff = NULL;
     fileName = NULL;
 }
 
@@ -367,9 +402,9 @@ void version()
 void help()
 {
     printf("Usage:\n");
-    printf("    pager.exe <filename>\n");
+    printf("    pager.exe [/? | /V] <filename> [/N]\n");
     printf("        or\n");
-    printf("    type <filename> | pager.exe\n");
+    printf("    type <filename> | pager.exe [/N]\n");
     printf("\n");
     printf("Controls:\n");
     printf("    j, ENTER, ARROW_DOWN    = scroll 1 line down\n");
@@ -381,5 +416,10 @@ void help()
     printf("    v                       = show file in editor (exit pager)\n");
     printf("    ?                       = help\n");
     printf("    q                       = exit\n");
+    printf("\n");
+    printf("Switches:\n");
+    printf("    /?                      = show help\n");
+    printf("    /V                      = show version\n");
+    printf("    /N                      = show line numbers\n");
     printf("\n");
 }
