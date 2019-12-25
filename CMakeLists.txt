@@ -24,6 +24,7 @@ set(3RD_PARTY ${CMAKE_SOURCE_DIR}/3rd-party)
 include(ExternalProject)
 ExternalProject_Add(PDCurses 
     GIT_REPOSITORY https://github.com/wmcbrine/PDCurses.git
+    GIT_TAG 3.9
     PREFIX ${3RD_PARTY}
     PATCH_COMMAND ""
     CONFIGURE_COMMAND ""

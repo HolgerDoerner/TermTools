@@ -76,7 +76,7 @@ unsigned short digitCount = 1;
 char *fileName = NULL;
 /* END (global vars) */
 
-struct SETTINGS
+typedef struct SETTINGS
 {
     long lineCount;
     WINDOW *term;
@@ -85,7 +85,7 @@ struct SETTINGS
     char *fileName;
     char **screenBuff;
     size_t sbCount;
-};
+} SETTINGS;
 
 
 void parseArgs(int, char **);
@@ -103,7 +103,7 @@ int main(int argc, char **argv)
 {
     setlocale(LC_ALL, "");
 
-    struct SETTINGS settings = {
+    SETTINGS settings = {
         .lineCount = 0,
         .term = NULL,
         .showLineNum = FALSE,
@@ -120,7 +120,8 @@ int main(int argc, char **argv)
     
     if (argc >= 2)
     {
-        parseArgs(argc, argv);
+        parseArgs(argc, argv, &settings);
+        printf("%d\n", settings.showLineNum);
 
         char *tmp = basename(argv[1]);
         if (tmp) fileName = tmp;
