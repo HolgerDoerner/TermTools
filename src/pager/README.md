@@ -8,13 +8,15 @@ A small utility similar to *less*.
 
 Controls:
 
-    ARROW_UP, K    = scroll 1 line up
-    ARROW_DOWN, J  = scroll 1 line down
-    PG_UP, l       = scroll 1 page up
-    PG_DOWN, h     = scroll 1 page down
-    HOME           = jump to beginning of the input
-    END            = jump to end of the input
-    ESC, q         = exit
+    j, ENTER, ARROW_DOWN    = scroll 1 line down
+    k, ARROW_UP             = scroll 1 line up
+    SPACE, PG_DOWN          = scroll 1 page down
+    b, PG_UP                = scroll 1 page up
+    g, HOME                 = jump to the beginning
+    G, END                  = jump to the end
+    v                       = show file in editor (exit pager)
+    ?                       = help
+    q                       = exit
 
 If a filename is given, it will be read. Otherwise pager.exe trys to read from 'stdin'.
 
