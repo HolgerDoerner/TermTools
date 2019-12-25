@@ -42,8 +42,6 @@
 #include <string.h>
 
 /*
- * Function:  basename 
- * --------------------
  * returns the last element of a path.
  *
  * _IN:
@@ -61,6 +59,14 @@ char *basename(const char *path)
     else return tmp;
 }
 
+/*
+ * calculates the number of digits for a given number.
+ *
+ * _IN:
+ *      number: a number
+ * 
+ * RETURNS: the number of digits, minimum 1
+ */
 unsigned int countDigits(int number)
 {
     unsigned int count = 1;
