@@ -162,7 +162,7 @@ int main(int argc, char **argv)
 
         // storing the linenumber within the string
         // sneaky, sneaky...
-        snprintf(screenBuff[sbCount++], BUFSIZ, "%5d: %s", sbCount, inBuf);
+        snprintf(screenBuff[sbCount++], BUFSIZ, "%7d: %s", sbCount, inBuf);
 
         if (feof(pFile)) break;
 
@@ -206,7 +206,7 @@ int main(int argc, char **argv)
     for (; lineCount <= (LINES - 2); ++lineCount)
     {
         wscrl(term, 1);
-        mvwaddnstr(term, LINES-2, 0, screenBuff[lineCount] + (showLineNum ? (5-digitCount) : 7), COLS);
+        mvwaddnstr(term, LINES-2, 0, screenBuff[lineCount] + (showLineNum ? (7-digitCount) : 9), COLS);
     }
 
     updateStatusLine();
@@ -256,7 +256,7 @@ void scrollUp(const int range)
         if (lineCount >= 0)
         {
             wscrl(term, -1);
-            mvwaddnstr(term, 0, 0, screenBuff[lineCount--] + (showLineNum ? (5-digitCount) : 7), COLS);
+            mvwaddnstr(term, 0, 0, screenBuff[lineCount--] + (showLineNum ? (7-digitCount) : 9), COLS);
         }
         else
         {
@@ -278,7 +278,7 @@ void scrollDown(const int range)
         if (lineCount < sbCount)
         {
             wscrl(term, 1);
-            mvwaddnstr(term, LINES-2, 0, screenBuff[lineCount++] + (showLineNum ? (5-digitCount) : 7), COLS);
+            mvwaddnstr(term, LINES-2, 0, screenBuff[lineCount++] + (showLineNum ? (7-digitCount) : 9), COLS);
         }
         else
         {
@@ -305,7 +305,7 @@ void gotoStartEnd(const int direction)
     for (int i = 0; i < (direction ? LINES : LINES-1); ++i)
     {
         wscrl(term, 1);
-        mvwaddnstr(term, LINES-2, 0, screenBuff[lineCount++] + (showLineNum ? (5-digitCount) : 7), COLS);
+        mvwaddnstr(term, LINES-2, 0, screenBuff[lineCount++] + (showLineNum ? (7-digitCount) : 9), COLS);
     }
 
     updateStatusLine();
