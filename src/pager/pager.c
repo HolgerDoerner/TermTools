@@ -33,6 +33,12 @@
  * GitHub: https://GitHub.com/HolgerDoerner/TermTools
  */
 
+// Version info
+#define VERSION_MAJOR 0
+#define VERSION_MINOR 5
+#define VERSION_PATCH 5
+#define VERSION_DATE "2019-12-26"
+
 #define _CRT_SECURE_NO_WARNINGS
 #define WIN32_LEAN_AND_MEAN
 #define USE_LIBCMT
@@ -110,46 +116,34 @@ int main(int argc, char **argv)
     FILE *pFile = NULL;
     short isStdinRedirected = FALSE;
     
-    if (argc >= 2)
-    {
-        parseArgs(&settings, argc, argv);
+    parseArgs(&settings, argc, argv);
 
-        char *tmp = basename(argv[1]);
-        if (tmp) settings.fileName = tmp;
-        else
+    if (settings.filePath)
+    {
+        settings.fileName = basename(settings.filePath);
+        if (!settings.fileName)
         {
-            size_t len = sizeof(chtype) * strlen(argv[1]);
-            settings.fileName = malloc(len + 1);
-            if (!settings.fileName)
-            {
-                perror("* ERROR");
-                return(EXIT_FAILURE);
-            }
-            snprintf(settings.fileName, len, "%s", argv[1]);
+            settings.fileName = settings.filePath;
         }
 
-        pFile = fopen(argv[1], "r");
-        if (pFile == NULL)
+        pFile = fopen(settings.filePath, "r");
+        if (!pFile)
         {
             perror("* ERROR");
         }
     }
     else
     {
-        char name[] = "pipe";
-        size_t len = sizeof(chtype) * strlen(name);
-        settings.fileName = malloc(len + 1);
-        if (!settings.fileName)
-        {
-            perror("* ERROR");
-            return(EXIT_FAILURE);
-        }
-        snprintf(settings.fileName, len, "%s", name);
+        settings.filePath = settings.fileName = "pipe";
         pFile = stdin;
         isStdinRedirected = TRUE;
     }
 
-    fillScreenBuffer(&settings, &pFile);
+    if (!fillScreenBuffer(&settings, &pFile))
+    {
+        fprintf(stderr, "* WARNING: fillScreenBuffer(): one or more params are NULL!\n");
+        exit(EXIT_FAILURE);
+    }
 
     if (!isStdinRedirected && fclose(pFile))
     {
@@ -205,11 +199,17 @@ int main(int argc, char **argv)
             case KEY_END: case VK_END: case 455: case 'G':
                 gotoStartEnd(&settings, BOTTOM); updateStatusLine(&settings); break;
             case 'v':
-                system(argv[1]); isRunning = FALSE; break;
+                // little dumb, but works ftm...
+                if (_stricmp(settings.filePath, "pipe") == 0) break;
+                else system(settings.filePath);
+                isRunning = FALSE;
+                break;
             case '?':
                 showInlineHelp(&settings); break;
-            // for now, just exit on resize
-            case KEY_RESIZE: isRunning = FALSE; break;
+            case KEY_RESIZE:
+                // for now, just exit on resize
+                isRunning = FALSE;
+                break;
             default: break;
         }
 
@@ -220,29 +220,73 @@ int main(int argc, char **argv)
     return EXIT_SUCCESS;
 }
 
-void parseArgs(SETTINGS *settings, int argc, char **argv)
+/*
+ * parses the commandline arguments and updates the settings.
+ * 
+ * _IN_OUT:
+ *      _settings: object of type struct SETTINGS
+ * 
+ * _IN:
+ *      _argc: number of arguments
+ *      _argv: the array of arguments
+ */
+void parseArgs(SETTINGS *_settings, int _argc, char **_argv)
 {
-    if (_stricmp(argv[1], "/?") == 0)
+    for (int i = 1; i < _argc; ++i)
+    {
+        if (_argv[i][0] == '/')
         {
-            help();
-            exit(0);
+            if (_stricmp(_argv[i], "/?") == 0)
+            {
+                help();
+                exit(EXIT_SUCCESS);
+            }
+            else if (_stricmp(_argv[i], "/v") == 0)
+            {
+                version();
+                exit(EXIT_SUCCESS);
+            }
+            else if (_stricmp(_argv[i], "/n") == 0)
+            {
+                (*_settings).showLineNum = true;
+            }
+            else
+            {
+                printf("* WARNING: unknown parameter: %s\n", _argv[i]);
+                exit(EXIT_FAILURE);
+            }
         }
-        else if (_stricmp(argv[1], "/v") == 0)
+        else
         {
-            version();
-            exit(0);
+            if (!_settings->filePath)
+                (*_settings).filePath = _argv[i];
+            else
+            {
+                printf("* WARNING: too mani arguments for FILEPATH: %s\n", _argv[i]);
+                exit(EXIT_FAILURE);
+            }
+            
         }
-        else if (argc == 3 && _stricmp(argv[2], "/n") == 0)
-        {
-            settings->showLineNum = true;
-        }
+    }
 }
 
-long fillScreenBuffer(SETTINGS *_settings, FILE **pFile)
+/*
+ * reads from input (_pFile) and fills the screenbuffer
+ * in _settings.
+ * 
+ * _IN_OUT:
+ *      _settings: object of type struct SETTINGS
+ * 
+ * _IN:
+ *      _pFile: a FILE object
+ * 
+ * _RETURNS: number of lines in the screenbuffer
+ *           for convenience or -1 on error
+ */
+long fillScreenBuffer(SETTINGS *_settings, FILE **_pFile)
 {
-    if (!_settings || !pFile) return -1;
+    if (!_settings || !_pFile) return -1;
 
-    // long sbCount = 0;
     unsigned int allocCount = 1;
     char inBuf[BUFSIZ];
 
@@ -253,7 +297,7 @@ long fillScreenBuffer(SETTINGS *_settings, FILE **pFile)
         exit(EXIT_FAILURE);
     }
 
-    while (fgets(inBuf, BUFSIZ, *pFile))
+    while (fgets(inBuf, BUFSIZ, *_pFile))
     {
         (*_settings).screenBuff[_settings->sbLines] = malloc(sizeof(char) * BUFSIZ);
         if (!(*_settings).screenBuff[_settings->sbLines])
@@ -266,10 +310,11 @@ long fillScreenBuffer(SETTINGS *_settings, FILE **pFile)
         // sneaky, sneaky...
         int ret = snprintf((*_settings).screenBuff[(*_settings).sbLines++], BUFSIZ, "%7ld: %s", _settings->sbLines, inBuf);
 
-        if (feof(*pFile)) break;
+        if (feof(*_pFile)) break;
 
         if ((_settings->sbLines > 0) && ((_settings->sbLines % BUFSIZ) == 0))
         {
+            // re-allocate if screenbuffer is not big enough
             (*_settings).screenBuff = realloc((*_settings).screenBuff, ((*_settings).sbSize *= ++allocCount));
             if (!(*_settings).screenBuff)
             {
@@ -282,6 +327,15 @@ long fillScreenBuffer(SETTINGS *_settings, FILE **pFile)
     return _settings->sbLines;
 }
 
+/*
+ * scrolls the screen up N lines.
+ * 
+ * _IN_OUT:
+ *      _settings: object of type struct SETTINGS
+ * 
+ * _IN:
+ *      range: number of lines to scroll
+ */
 void scrollUp(SETTINGS *_settings, const int range)
 {
     (*_settings).lineCount -= LINES;
@@ -304,6 +358,15 @@ void scrollUp(SETTINGS *_settings, const int range)
     (*_settings).lineCount += LINES;
 }
 
+/*
+ * scrolls the screen down N lines.
+ * 
+ * _IN_OUT:
+ *      _settings: object of type struct SETTINGS
+ * 
+ * _IN:
+ *      range: number of lines to scroll
+ */
 void scrollDown(SETTINGS *_settings, const int range)
 {
     for (int i = 0; i < range; ++i)
@@ -322,6 +385,15 @@ void scrollDown(SETTINGS *_settings, const int range)
     }
 }
 
+/*
+ * jumps to start or end of the screenbuffer.
+ * 
+ * _IN_OUT:
+ *      _settings: object of type struct SETTINGS
+ * 
+ * _IN:
+ *      direction: TOP (0) or BOTTOM (1)
+ */
 void gotoStartEnd(SETTINGS *_settings, const int direction)
 {
     if ( ((_settings->lineCount == LINES-1) & (direction == TOP))
@@ -340,6 +412,13 @@ void gotoStartEnd(SETTINGS *_settings, const int direction)
     }
 }
 
+/*
+ * generates and prints the statusline on the bottom
+ * of the screen.
+ * 
+ * _IN:
+ *      _settings: object of type struct SETTINGS
+ */
 void updateStatusLine(SETTINGS *_settings)
 {
     wmove(_settings->term, LINES-1, 0);
@@ -356,6 +435,13 @@ void updateStatusLine(SETTINGS *_settings)
     free(status);
 }
 
+/*
+ * generates and prints the inline-help to
+ * the bottom of the screen.
+ * 
+ * _IN:
+ *      _settings: object of type struct SETTINGS
+ */
 void showInlineHelp(SETTINGS *_settings)
 {
     wmove(_settings->term, LINES-1, 0);
@@ -365,13 +451,20 @@ void showInlineHelp(SETTINGS *_settings)
     size_t barSize = sizeof(chtype) * COLS;
 
     helpMessage = malloc(barSize);
-    snprintf(helpMessage, barSize-1, " ENTER, j: DOWN - k: LINE_UP - SPACE: PAGE_DOWN - b: PAGE_UP - g: TOP - G: END - q: EXIT ");
+    snprintf(helpMessage, barSize-1, " ENTER, j: DOWN - k: UP - SPACE: P_DOWN - b: P_UP - g: TOP - G: END - q: EXIT ");
     wattron(_settings->term, COLOR_PAIR(3));
     mvwaddnstr(_settings->term, LINES-1, 0, helpMessage, COLS);
     wattron(_settings->term, COLOR_PAIR(1));
     free(helpMessage); 
 }
 
+/*
+ * cleans up allocated memory (screenbuffer) and
+ * exits PDCurses for gracefull exit.
+ * 
+ * _IN_OUT:
+ *      _settings: object of type struct SETTINGS
+ */
 void cleanup(SETTINGS *_settings)
 {
     endwin();
@@ -384,16 +477,20 @@ void cleanup(SETTINGS *_settings)
     }
 
     free((*_settings).screenBuff);
-    free((*_settings).fileName);
     (*_settings).screenBuff = NULL;
-    (*_settings).fileName = NULL;
 }
 
+/*
+ * prints the version to the commandline.
+ */
 void version()
 {
-    printf("pager.exe - Version: 0.5.0 - Date: 2019-12-20\n");
+    printf("Version: %d.%d.%d (%s)\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_DATE);
 }
 
+/*
+ * prints usage-information to the commandline.
+ */
 void help()
 {
     printf("Usage:\n");

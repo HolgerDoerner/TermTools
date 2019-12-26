@@ -25,7 +25,7 @@
  * For more information, please refer to <https://unlicense.org>
  * -----------------------------------------------------------------------
  * 
- * counter - a simle line- and wordcounter for text-files.
+ * counter - a simple line- and wordcounter for text-files.
  * 
  * Author: Holger Dörner <holger.doerner@gmail.com>
  * 
