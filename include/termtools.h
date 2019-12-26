@@ -51,8 +51,10 @@
  */
 char *basename(const char *path)
 {
-    // if (!path) return NULL;
+    if (!path) return NULL;
+
     int pathsep = '\\'; //sorry, Windows only...
+
     char *tmp = strrchr(path, pathsep);
     if (tmp) return tmp + 1;
     else return tmp;
@@ -66,9 +68,9 @@ char *basename(const char *path)
  * 
  * RETURNS: the number of digits, minimum 1
  */
-unsigned short countDigits(long long number)
+unsigned char countDigits(long long number)
 {
-    unsigned short count = 1;
+    unsigned char count = 1;
 
     if (number >= 10)
     {

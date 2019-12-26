@@ -31,7 +31,7 @@
  * 
  * This application is part of the 'TermTools'-project.
  * GitHub: https://GitHub.com/HolgerDoerner/TermTools
-*/
+ */
 
 #define _CRT_SECURE_NO_WARNINGS
 #define WIN32_LEAN_AND_MEAN
@@ -45,7 +45,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
-#include <math.h>
+#include <stdbool.h>
 
 #ifdef MOUSE_MOVED
     #undef MOUSE_MOVED
@@ -65,37 +65,29 @@
 
 #define TOP 0
 #define BOTTOM 1
-#define TRUE 1
-#define FALSE 0
-
-/* global vars */
-long lineCount = 0;
-WINDOW *term = NULL;
-unsigned short showLineNum = FALSE;
-unsigned short digitCount = 1;
-char *fileName = NULL;
-/* END (global vars) */
 
 typedef struct SETTINGS
 {
-    long lineCount;
     WINDOW *term;
-    unsigned short showLineNum;
-    unsigned short digitCount;
+    bool showLineNum;
+    long lineCount;
+    long sbLines;
+    long sbSize;
+    unsigned char digitCount;
     char *fileName;
+    char *filePath;
     char **screenBuff;
-    size_t sbCount;
 } SETTINGS;
 
 
-void parseArgs(int, char **);
-long fillScreenBuffer(char ***, FILE **);
-void scrollUp(char **, const int);
-void scrollDown(char **, long, const int);
-void gotoStartEnd(char **, long, const int);
-void updateStatusLine(long);
-void showHelp(void);
-void cleanup(char ***, long);
+void parseArgs(SETTINGS *, int, char **);
+long fillScreenBuffer(SETTINGS *, FILE **);
+void scrollUp(SETTINGS *, const int);
+void scrollDown(SETTINGS *, const int);
+void gotoStartEnd(SETTINGS *, const int);
+void updateStatusLine(SETTINGS *);
+void showInlineHelp(SETTINGS *);
+void cleanup(SETTINGS *);
 void version(void);
 void help(void);
 
@@ -106,35 +98,34 @@ int main(int argc, char **argv)
     SETTINGS settings = {
         .lineCount = 0,
         .term = NULL,
-        .showLineNum = FALSE,
+        .showLineNum = false,
         .digitCount = 1,
         .fileName = NULL,
+        .filePath = NULL,
         .screenBuff = NULL,
-        .sbCount = 0
+        .sbLines = 0,
+        .sbSize = (sizeof(char *) * BUFSIZ)
     };
 
-    char **screenBuff = NULL;
-    long sbCount = 0;
     FILE *pFile = NULL;
     short isStdinRedirected = FALSE;
     
     if (argc >= 2)
     {
-        parseArgs(argc, argv, &settings);
-        printf("%d\n", settings.showLineNum);
+        parseArgs(&settings, argc, argv);
 
         char *tmp = basename(argv[1]);
-        if (tmp) fileName = tmp;
+        if (tmp) settings.fileName = tmp;
         else
         {
             size_t len = sizeof(chtype) * strlen(argv[1]);
-            fileName = malloc(len + 1);
-            if (!fileName)
+            settings.fileName = malloc(len + 1);
+            if (!settings.fileName)
             {
                 perror("* ERROR");
                 return(EXIT_FAILURE);
             }
-            snprintf(fileName, len, "%s", argv[1]);
+            snprintf(settings.fileName, len, "%s", argv[1]);
         }
 
         pFile = fopen(argv[1], "r");
@@ -147,18 +138,18 @@ int main(int argc, char **argv)
     {
         char name[] = "pipe";
         size_t len = sizeof(chtype) * strlen(name);
-        fileName = malloc(len + 1);
-        if (!fileName)
+        settings.fileName = malloc(len + 1);
+        if (!settings.fileName)
         {
             perror("* ERROR");
             return(EXIT_FAILURE);
         }
-        snprintf(fileName, len, "%s", name);
+        snprintf(settings.fileName, len, "%s", name);
         pFile = stdin;
         isStdinRedirected = TRUE;
     }
 
-    sbCount = fillScreenBuffer(&screenBuff, &pFile);
+    fillScreenBuffer(&settings, &pFile);
 
     if (!isStdinRedirected && fclose(pFile))
     {
@@ -170,11 +161,11 @@ int main(int argc, char **argv)
         freopen("CON", "r", stdin);
     }
     
-    term = initscr();
+    settings.term = initscr();
     start_color();
     raw();
-    keypad(term, TRUE);
-    scrollok(term, TRUE);
+    keypad(settings.term, TRUE);
+    scrollok(settings.term, TRUE);
     noecho();
     nonl();
     curs_set(0);
@@ -183,16 +174,16 @@ int main(int argc, char **argv)
     init_pair(2, COLOR_BLACK, COLOR_WHITE);
     init_pair(3, COLOR_BLACK, COLOR_MAGENTA);
 
-    digitCount = countDigits(sbCount);
+    settings.digitCount = countDigits(settings.sbLines);
 
-    for (; lineCount <= (LINES - 2); ++lineCount)
+    for (; settings.lineCount <= (LINES - 2); ++settings.lineCount)
     {
-        wscrl(term, 1);
-        mvwaddnstr(term, LINES-2, 0, screenBuff[lineCount] + (showLineNum ? (7-digitCount) : 9), COLS);
+        wscrl(settings.term, 1);
+        mvwaddnstr(settings.term, LINES-2, 0, settings.screenBuff[settings.lineCount] + (settings.showLineNum ? (7 - settings.digitCount) : 9), COLS);
     }
 
-    updateStatusLine(sbCount);
-    wrefresh(term);
+    updateStatusLine(&settings);
+    wrefresh(settings.term);
 
     // main loop
     int isRunning = TRUE;
@@ -202,34 +193,34 @@ int main(int argc, char **argv)
         {
             case VK_ESCAPE: case 'q': isRunning = FALSE; break;
             case KEY_ENTER: case VK_RETURN: case KEY_DOWN: case VK_DOWN: case 'j':
-                scrollDown(screenBuff, sbCount, 1); updateStatusLine(sbCount); break;
+                scrollDown(&settings, 1); updateStatusLine(&settings); break;
             case KEY_UP: case VK_UP: case 'k':
-                scrollUp(screenBuff, 1); updateStatusLine(sbCount); break;
+                scrollUp(&settings, 1); updateStatusLine(&settings); break;
             case KEY_NPAGE: case VK_NEXT: case ' ':
-                scrollDown(screenBuff, sbCount, LINES); updateStatusLine(sbCount); break;
+                scrollDown(&settings, LINES); updateStatusLine(&settings); break;
             case KEY_PPAGE: case VK_PRIOR: case 'b':
-                scrollUp(screenBuff, LINES); updateStatusLine(sbCount); break;
+                scrollUp(&settings, LINES); updateStatusLine(&settings); break;
             case KEY_HOME: case VK_HOME: case 449: case 'g':
-                gotoStartEnd(screenBuff, sbCount, TOP); updateStatusLine(sbCount); break;
+                gotoStartEnd(&settings, TOP); updateStatusLine(&settings); break;
             case KEY_END: case VK_END: case 455: case 'G':
-                gotoStartEnd(screenBuff, sbCount, BOTTOM); updateStatusLine(sbCount); break;
+                gotoStartEnd(&settings, BOTTOM); updateStatusLine(&settings); break;
             case 'v':
                 system(argv[1]); isRunning = FALSE; break;
             case '?':
-                showHelp(); break;
+                showInlineHelp(&settings); break;
             // for now, just exit on resize
             case KEY_RESIZE: isRunning = FALSE; break;
             default: break;
         }
 
-        wrefresh(term);
+        wrefresh(settings.term);
     }
 
-    // cleanup(&screenBuff, sbCount);
-    return 0;
+    cleanup(&settings);
+    return EXIT_SUCCESS;
 }
 
-void parseArgs(int argc, char **argv)
+void parseArgs(SETTINGS *settings, int argc, char **argv)
 {
     if (_stricmp(argv[1], "/?") == 0)
         {
@@ -243,40 +234,44 @@ void parseArgs(int argc, char **argv)
         }
         else if (argc == 3 && _stricmp(argv[2], "/n") == 0)
         {
-            showLineNum = TRUE;
+            settings->showLineNum = true;
         }
 }
 
-long fillScreenBuffer(char ***screenBuff, FILE **pFile)
+long fillScreenBuffer(SETTINGS *_settings, FILE **pFile)
 {
-    if (!screenBuff || !pFile) return 0;
+    if (!_settings || !pFile) return -1;
 
-    long sbCount = 0;
+    // long sbCount = 0;
     unsigned int allocCount = 1;
     char inBuf[BUFSIZ];
 
-    *screenBuff = malloc(sizeof(char *) * BUFSIZ);
+    (*_settings).screenBuff = malloc(_settings->sbSize);
+    if (!(*_settings).screenBuff)
+    {
+        perror("* ERROR");
+        exit(EXIT_FAILURE);
+    }
 
     while (fgets(inBuf, BUFSIZ, *pFile))
     {
-        (*screenBuff)[sbCount] = malloc(sizeof(char) * BUFSIZ);
-        if ((*screenBuff)[sbCount] == NULL)
+        (*_settings).screenBuff[_settings->sbLines] = malloc(sizeof(char) * BUFSIZ);
+        if (!(*_settings).screenBuff[_settings->sbLines])
         {
             perror("* ERROR");
-            exit(1);
+            exit(EXIT_FAILURE);
         }
 
         // storing the linenumber within the string
         // sneaky, sneaky...
-        int ret = snprintf((*screenBuff)[sbCount++], BUFSIZ, "%7ld: %s", sbCount, inBuf);
+        int ret = snprintf((*_settings).screenBuff[(*_settings).sbLines++], BUFSIZ, "%7ld: %s", _settings->sbLines, inBuf);
 
         if (feof(*pFile)) break;
 
-        if ((sbCount > 0) && ((sbCount % BUFSIZ) == 0))
+        if ((_settings->sbLines > 0) && ((_settings->sbLines % BUFSIZ) == 0))
         {
-            *screenBuff = realloc(*screenBuff, sizeof(char *) * (BUFSIZ * ++allocCount));
-
-            if (*screenBuff == NULL)
+            (*_settings).screenBuff = realloc((*_settings).screenBuff, ((*_settings).sbSize *= ++allocCount));
+            if (!(*_settings).screenBuff)
             {
                 perror("* ERROR");
                 exit(EXIT_FAILURE);
@@ -284,19 +279,19 @@ long fillScreenBuffer(char ***screenBuff, FILE **pFile)
         }
     }
 
-    return sbCount;
+    return _settings->sbLines;
 }
 
-void scrollUp(char **screenBuff, const int range)
+void scrollUp(SETTINGS *_settings, const int range)
 {
-    lineCount -= LINES;
+    (*_settings).lineCount -= LINES;
 
     for (int i = 0; i < range; ++i)
     {
-        if (lineCount >= 0)
+        if (_settings->lineCount >= 0)
         {
-            wscrl(term, -1);
-            mvwaddnstr(term, 0, 0, screenBuff[lineCount--] + (showLineNum ? (7-digitCount) : 9), COLS);
+            wscrl(_settings->term, -1);
+            mvwaddnstr(_settings->term, 0, 0, (*_settings).screenBuff[(*_settings).lineCount--] + (_settings->showLineNum ? (7 - _settings->digitCount) : 9), COLS);
         }
         else
         {
@@ -306,17 +301,17 @@ void scrollUp(char **screenBuff, const int range)
         }
     }
 
-    lineCount += LINES;
+    (*_settings).lineCount += LINES;
 }
 
-void scrollDown(char **screenBuff, long sbCount, const int range)
+void scrollDown(SETTINGS *_settings, const int range)
 {
     for (int i = 0; i < range; ++i)
     {
-        if (lineCount < sbCount)
+        if (_settings->lineCount < _settings->sbLines)
         {
-            wscrl(term, 1);
-            mvwaddnstr(term, LINES-2, 0, screenBuff[lineCount++] + (showLineNum ? (7-digitCount) : 9), COLS);
+            wscrl(_settings->term, 1);
+            mvwaddnstr(_settings->term, LINES-2, 0, (*_settings).screenBuff[(*_settings).lineCount++] + (_settings->showLineNum ? (7 - _settings->digitCount) : 9), COLS);
         }
         else
         {
@@ -327,71 +322,71 @@ void scrollDown(char **screenBuff, long sbCount, const int range)
     }
 }
 
-void gotoStartEnd(char **screenBuff, long sbCount, const int direction)
+void gotoStartEnd(SETTINGS *_settings, const int direction)
 {
-    if ( ((lineCount == LINES-1) & (direction == TOP))
-        || ((lineCount == sbCount) & (direction == BOTTOM)) )
+    if ( ((_settings->lineCount == LINES-1) & (direction == TOP))
+        || ((_settings->lineCount == _settings->sbLines) & (direction == BOTTOM)) )
     {
         beep();
         flash();
         return;
     }
 
-    lineCount = direction ? (sbCount - LINES) : 0;
+    (*_settings).lineCount = direction ? (_settings->sbLines - LINES) : 0;
     for (int i = 0; i < (direction ? LINES : LINES-1); ++i)
     {
-        wscrl(term, 1);
-        mvwaddnstr(term, LINES-2, 0, screenBuff[lineCount++] + (showLineNum ? (7-digitCount) : 9), COLS);
+        wscrl(_settings->term, 1);
+        mvwaddnstr(_settings->term, LINES-2, 0, (*_settings).screenBuff[(*_settings).lineCount++] + (_settings->showLineNum ? (7 - _settings->digitCount) : 9), COLS);
     }
 }
 
-void updateStatusLine(long sbCount)
+void updateStatusLine(SETTINGS *_settings)
 {
-    wmove(term, LINES-1, 0);
-    wclrtoeol(term);
+    wmove(_settings->term, LINES-1, 0);
+    wclrtoeol(_settings->term);
 
     char *status;
     size_t barSize = sizeof(chtype) * COLS;
 
     status = malloc(barSize);
-    snprintf(status, barSize-1, " %s: %ld of %ld (%3ld%%) ", fileName, lineCount, sbCount, (100 * lineCount / sbCount));
-    wattron(term, COLOR_PAIR(2));
-    mvwaddnstr(term, LINES-1, 0, status, COLS);
-    wattron(term, COLOR_PAIR(1));
+    snprintf(status, barSize-1, " %s: %ld of %ld (%3ld%%) ", _settings->fileName, _settings->lineCount, _settings->sbLines, (100 * _settings->lineCount / _settings->sbLines));
+    wattron(_settings->term, COLOR_PAIR(2));
+    mvwaddnstr(_settings->term, LINES-1, 0, status, COLS);
+    wattron(_settings->term, COLOR_PAIR(1));
     free(status);
 }
 
-void showHelp()
+void showInlineHelp(SETTINGS *_settings)
 {
-    wmove(term, LINES-1, 0);
-    wclrtoeol(term);
+    wmove(_settings->term, LINES-1, 0);
+    wclrtoeol(_settings->term);
 
-    char *help;
+    char *helpMessage;
     size_t barSize = sizeof(chtype) * COLS;
 
-    help = malloc(barSize);
-    snprintf(help, barSize-1, " ENTER, j: DOWN - k: LINE_UP - SPACE: PAGE_DOWN - b: PAGE_UP - g: TOP - G: END - q: EXIT ");
-    wattron(term, COLOR_PAIR(3));
-    mvwaddnstr(term, LINES-1, 0, help, COLS);
-    wattron(term, COLOR_PAIR(1));
-    free(help); 
+    helpMessage = malloc(barSize);
+    snprintf(helpMessage, barSize-1, " ENTER, j: DOWN - k: LINE_UP - SPACE: PAGE_DOWN - b: PAGE_UP - g: TOP - G: END - q: EXIT ");
+    wattron(_settings->term, COLOR_PAIR(3));
+    mvwaddnstr(_settings->term, LINES-1, 0, helpMessage, COLS);
+    wattron(_settings->term, COLOR_PAIR(1));
+    free(helpMessage); 
 }
 
-void cleanup(char ***screenBuff, long sbCount)
+void cleanup(SETTINGS *_settings)
 {
     endwin();
-    delwin(term);
+    delwin(_settings->term);
 
-    for (int i = 0; i < sbCount; ++i)
+    for (int i = 0; i < _settings->sbLines; ++i)
     {
-        free((*screenBuff)[i]);
-        screenBuff[i] = NULL;
+        free((*_settings).screenBuff[i]);
+        (*_settings).screenBuff[i] = NULL;
     }
 
-    free(*screenBuff);
-    free(fileName);
-    *screenBuff = NULL;
-    fileName = NULL;
+    free((*_settings).screenBuff);
+    free((*_settings).fileName);
+    (*_settings).screenBuff = NULL;
+    (*_settings).fileName = NULL;
 }
 
 void version()

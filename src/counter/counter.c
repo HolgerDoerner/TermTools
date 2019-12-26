@@ -31,7 +31,7 @@
  * 
  * This application is part of the 'TermTools'-project.
  * GitHub: https://GitHub.com/HolgerDoerner/TermTools
-*/
+ */
 
 #define _CRT_SECURE_NO_WARNINGS
 #define USE_LIBCMT
