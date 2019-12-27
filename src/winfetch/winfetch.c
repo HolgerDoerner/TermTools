@@ -130,26 +130,48 @@ int main(int argc, char **argv)
         fprintf(stderr, "* ERROR: getting GPU info\n");
         exit(EXIT_FAILURE);
     }
+
+    // Set output mode to handle virtual terminal sequences
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hOut == INVALID_HANDLE_VALUE)
+    {
+        return GetLastError();
+    }
+
+    DWORD dwMode = 0;
+    if (!GetConsoleMode(hOut, &dwMode))
+    {
+        return GetLastError();
+    }
+
+    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    if (!SetConsoleMode(hOut, dwMode))
+    {
+        return GetLastError();
+    }
     
-	printf("                                111 %-10s  %s", "", sysinfo.COMPUTERSYSTEM_UserName);
-	printf("                    111111111111111 %-10s  %s", "", "------------------------------\n");
-    printf("      11111111  1111111111111111111 %10s: %s", "OS", sysinfo.OS_Caption);
-	printf("11111111111111  1111111111111111111 %-10s  %s", "", sysinfo.OS_Version);
-	printf("11111111111111  1111111111111111111 %-10s  %s", "", sysinfo.OS_OSArchitecture);
-	printf("11111111111111  1111111111111111111 %-10s  %s", "", sysinfo.OS_MUILanguages);
-	printf("11111111111111  1111111111111111111 %-10s  %s", "", sysinfo.TIMEZONE_Caption);
-	printf("11111111111111  1111111111111111111 %10s: %s", "Mainboard", sysinfo.BASEBOARD_Manufacturer);
-	printf("11111111111111  1111111111111111111 %-10s  %s", "", sysinfo.BASEBOARD_Product);
-	printf("                                    %10s: %s", "BIOS", sysinfo.BIOS_Manufacturer);
-	printf("11111111111111  1111111111111111111 %-10s  %s", "", sysinfo.BIOS_Name);
-	printf("11111111111111  1111111111111111111 %10s: %s", "RAM", sysinfo.COMPUTERSYSTEM_TotalPhysicalMemory);
-	printf("11111111111111  1111111111111111111 %10s: %s", "CPU", sysinfo.CPU_Name);
-	printf("11111111111111  1111111111111111111 %10s  %s", "", sysinfo.CPU_SocketDesignation);
-	printf("11111111111111  1111111111111111111 %10s  # %s", "", sysinfo.CPU_NumberOfCores);
-	printf("11111111111111  1111111111111111111 %10s: %s", "GPU", sysinfo.GPU_Name);
-	printf("      11111111  1111111111111111111 %10s  %s", "", sysinfo.GPU_DriverVersion);
-	printf("                    111111111111111 %10s  %s", "", sysinfo.GPU_AdapterRAM);
-	printf("                                111 %10s  %s", "", sysinfo.GPU_VideoModeDescription);
+    system("cls");
+	printf("\n");
+	printf("\x1b[36m                                 111\x1b[0m %-10s  \x1b[1\x1b[96m%s\x1b[0m", "", sysinfo.COMPUTERSYSTEM_UserName);
+	printf("\x1b[36m                     111111111111111\x1b[0m %-10s  %s", "", "------------------------------\n");
+    printf("\x1b[36m       11111111  1111111111111111111\x1b[0m \x1b[33m%10s:\x1b[0m %s", "OS", sysinfo.OS_Caption);
+	printf("\x1b[36m 11111111111111  1111111111111111111\x1b[0m %-10s  %s", "", sysinfo.OS_Version);
+	printf("\x1b[36m 11111111111111  1111111111111111111\x1b[0m %-10s  %s", "", sysinfo.OS_OSArchitecture);
+	printf("\x1b[36m 11111111111111  1111111111111111111\x1b[0m %-10s  %s", "", sysinfo.OS_MUILanguages);
+	printf("\x1b[36m 11111111111111  1111111111111111111\x1b[0m %-10s  %s", "", sysinfo.TIMEZONE_Caption);
+	printf("\x1b[36m 11111111111111  1111111111111111111\x1b[0m \x1b[33m%10s:\x1b[0m %s", "Mainboard", sysinfo.BASEBOARD_Manufacturer);
+	printf("\x1b[36m 11111111111111  1111111111111111111\x1b[0m %-10s  %s", "", sysinfo.BASEBOARD_Product);
+	printf("                                     \x1b[33m%10s:\x1b[0m %s", "BIOS", sysinfo.BIOS_Manufacturer);
+	printf("\x1b[36m 11111111111111  1111111111111111111\x1b[0m %-10s  %s", "", sysinfo.BIOS_Name);
+	printf("\x1b[36m 11111111111111  1111111111111111111\x1b[0m \x1b[33m%10s:\x1b[0m %s", "RAM", sysinfo.COMPUTERSYSTEM_TotalPhysicalMemory);
+	printf("\x1b[36m 11111111111111  1111111111111111111\x1b[0m \x1b[33m%10s:\x1b[0m %s", "CPU", sysinfo.CPU_Name);
+	printf("\x1b[36m 11111111111111  1111111111111111111\x1b[0m %10s  %s", "", sysinfo.CPU_SocketDesignation);
+	printf("\x1b[36m 11111111111111  1111111111111111111\x1b[0m %10s  # %s", "", sysinfo.CPU_NumberOfCores);
+	printf("\x1b[36m 11111111111111  1111111111111111111\x1b[0m \x1b[33m%10s:\x1b[0m %s", "GPU", sysinfo.GPU_Name);
+	printf("\x1b[36m       11111111  1111111111111111111\x1b[0m %10s  %s", "", sysinfo.GPU_DriverVersion);
+	printf("\x1b[36m                     111111111111111\x1b[0m %10s  %s", "", sysinfo.GPU_AdapterRAM);
+	printf("\x1b[36m                                 111\x1b[0m %10s  %s", "", sysinfo.GPU_VideoModeDescription);
+	printf("\n");
 
 	// printf("%-40s: %s", "OS_ServicePackMajorVersion", sysinfo.OS_ServicePackMajorVersion);
 	// printf("%-40s: %s", "OS_ServicePackMinorVersion", sysinfo.OS_ServicePackMinorVersion);
