@@ -1,4 +1,6 @@
 ![](https://github.com/holgerdoerner/TermTools/workflows/CTest/badge.svg) ![](https://github.com/holgerdoerner/TermTools/workflows/Release%20Packaging/badge.svg) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/7f1fa4df8d47447daf76710556eed469)](https://www.codacy.com/manual/HolgerDoerner/TermTools?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=HolgerDoerner/TermTools&amp;utm_campaign=Badge_Grade)
+
+[![GitHub release](https://img.shields.io/github/release/HolgerDoerner/TermTools.svg)](https://GitHub.com/HolgerDoerner/TermTools/releases/) [![GitHub license](https://img.shields.io/github/license/HolgerDoerner/TermTools.svg)](https://github.com/HolgerDoerner/TermTools/blob/master/LICENSE)
 # TermTools <!-- omit in toc -->
 A collection of tools for the terminal written in C. They are first and foremost aimed for the Windows platform.
 
