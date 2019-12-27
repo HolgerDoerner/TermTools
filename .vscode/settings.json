@@ -3,7 +3,7 @@
     "cmake.generator": "NMake Makefiles",
     "cmake.configureOnOpen": true,
     "files.associations": {
-        "curses.h": "c",
-        "stdbool.h": "c"
+        "*.c": "c",
+        "*.h": "c"
     }
 }

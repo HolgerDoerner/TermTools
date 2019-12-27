@@ -1,18 +1,19 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(TermTools VERSION 0.2.1 LANGUAGES C)
+project(TermTools VERSION 0.3.0 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11)
 
 string(REPLACE "/MD" "/MT" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
 string(REPLACE "/MDd" "/MTd" CMAKE_C_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
 
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /nologo /W3 /EHsc")
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /nologo /Ox /W3 /EHsc")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /nologo /W3 /EHsc /UTF-8")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /nologo /Ox /W3 /EHsc /UTF-8")
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/bin)
 set(TEST_FILES_DIR ${CMAKE_SOURCE_DIR}/etc/test-files)
 
-include_directories(include)
+# project-wide includes
+include_directories(${CMAKE_SOURCE_DIR}/include)
 
 # include(CTest)
 enable_testing()
@@ -62,7 +63,8 @@ add_custom_command(TARGET "zip_release"
 # ==== START TARGETS ====
 
 set(TARGET_LIST pager
-                counter)
+                counter
+                winfetch)
 
 foreach(target ${TARGET_LIST})
     add_subdirectory(src/${target})

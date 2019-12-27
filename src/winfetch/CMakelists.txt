@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.0)
+
+project(winfetch VERSION 0.1.0 LANGUAGES C)
+
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
+
+add_executable(${PROJECT_NAME} winfetch.c)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME ${PROJECT_NAME})

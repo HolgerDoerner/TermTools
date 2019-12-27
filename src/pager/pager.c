@@ -80,8 +80,8 @@ typedef struct SETTINGS
     long sbLines;
     long sbSize;
     unsigned char digitCount;
-    char *fileName;
-    char *filePath;
+    const char *fileName;
+    const char *filePath;
     char **screenBuff;
 } SETTINGS;
 

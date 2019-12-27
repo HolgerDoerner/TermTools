@@ -18,6 +18,7 @@ NAME | DESCRIPTION
 --- | ---
 pager | A terminal pager. More like less...
 counter | A simple counter. Counts lines or words in text-files.
+winfetch | Displays System-Information on the terminal.
 
 # Build
 ## Requirements

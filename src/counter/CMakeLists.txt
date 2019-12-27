@@ -10,11 +10,11 @@ add_executable(${PROJECT_NAME} counter.c)
 set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME ${PROJECT_NAME})
 
 # CTest cases
-add_test(NAME counter_linecount_43
+add_test(NAME counter_linecount_37
         WORKING_DIRECTORY ${TEST_FILES_DIR}
         COMMAND ${PROJECT_NAME} test.txt)
-set_tests_properties(counter_linecount_43 PROPERTIES 
-        PASS_REGULAR_EXPRESSION "43")
+set_tests_properties(counter_linecount_37 PROPERTIES 
+        PASS_REGULAR_EXPRESSION "37")
 
 add_test(NAME counter_wordcount_395
         WORKING_DIRECTORY ${TEST_FILES_DIR}

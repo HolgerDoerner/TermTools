@@ -36,9 +36,11 @@
 #ifndef _TERMTOOLS_H
 #define _TERMTOOLS_H
 
+#include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 /*
  * returns the last element of a path.
@@ -49,14 +51,14 @@
  * RETURNS: a pointer to the start of the last element
  *           or NULL.
  */
-char *basename(const char *path)
+const char *basename(const char *_path)
 {
-    if (!path) return NULL;
+    if (!_path) return NULL;
 
     int pathsep = '\\'; //sorry, Windows only...
 
-    char *tmp = strrchr(path, pathsep);
-    if (tmp) return tmp + 1;
+    const char *tmp = strrchr(_path, pathsep);
+    if (tmp) return ++tmp;
     else return tmp;
 }
 
@@ -68,16 +70,47 @@ char *basename(const char *path)
  * 
  * RETURNS: the number of digits, minimum 1
  */
-unsigned char countDigits(long long number)
+unsigned char countDigits(long long _number)
 {
     unsigned char count = 1;
 
-    if (number >= 10)
+    if (_number >= 10)
     {
-        while (number /= 10) ++count;
+        while (_number /= 10) ++count;
     }
     
     return count;
+}
+
+/*
+ * checks for blank lines/strings.
+ * 
+ * 'blank' means, the string doesn't contain any printable charakters,
+ * but it still MAY contain control charakters like '\n', '\r\n', '\t',
+ * '\0' or ' ' (whitespace) so it is *technicaly* not empty. A string
+ * is NOT blank if it contains at least 1 printable charakter.
+ * An EMPTY string ("") is ALSO BLANK!
+ * 
+ * _IN:
+ *      _line: the line/string to check
+ * 
+ * _RETURNS: 0 (FALSE) if contains printable charakters, otherwise 1 (TRUE)
+ */
+int isLineBlank(char *_line)
+{
+    if (!_line) return 0;
+
+    size_t len = strlen(_line);
+    if (len < 1) return 0;
+
+    bool _empty = true;
+
+    for (int i = 0; i < len; ++i)
+    {
+        if (iswprint(_line[i])) _empty = false;
+    }
+
+    return _empty;
 }
 
 #endif // _TERMTOOLS_H

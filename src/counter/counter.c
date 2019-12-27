@@ -40,6 +40,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "termtools.h"
+
 #define CLINES 0
 #define CWORDS 1
 
@@ -134,6 +136,8 @@ size_t count(const char *fileName, short mode)
     char buffer[BUFSIZ];
     while (fgets(buffer, BUFSIZ, pFile))
     {
+        // if (isLineBlank(buffer)) continue;
+
         if (mode == CWORDS)
         {
             tok = strtok(buffer, delimeter);
@@ -145,7 +149,7 @@ size_t count(const char *fileName, short mode)
             }
         }
 
-        if (mode == CLINES) ++counter;
+        if (mode == CLINES && !isLineBlank(buffer)) ++counter;
 
         if (feof(pFile)) break;
     }
