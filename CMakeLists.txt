@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(TermTools VERSION 0.3.0 LANGUAGES C)
+project(TermTools  VERSION 0.3.0 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11)
 
@@ -14,6 +14,10 @@ set(TEST_FILES_DIR ${CMAKE_SOURCE_DIR}/etc/test-files)
 
 # project-wide includes
 include_directories(${CMAKE_SOURCE_DIR}/include)
+
+configure_file(${CMAKE_SOURCE_DIR}/include/tt_version.h.in
+                ${CMAKE_SOURCE_DIR}/include/tt_version.h
+                WIN32)
 
 # include(CTest)
 enable_testing()
@@ -64,7 +68,8 @@ add_custom_command(TARGET "zip_release"
 
 set(TARGET_LIST pager
                 counter
-                winfetch)
+                winfetch
+                timer)
 
 foreach(target ${TARGET_LIST})
     add_subdirectory(src/${target})

@@ -41,6 +41,7 @@
 #include <string.h>
 
 #include "termtools.h"
+#include "counter_version.h"
 
 #define CLINES 0
 #define CWORDS 1

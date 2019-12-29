@@ -36,6 +36,11 @@
 #ifndef _TERMTOOLS_H
 #define _TERMTOOLS_H
 
+#include "tt_version.h"
+// #define TT_VERSION_MAJOR 0
+// #define TT_VERSION_MINOR 3
+// #define TT_VERSION_PATCH 0
+
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -111,6 +116,95 @@ int isLineBlank(char *_line)
     }
 
     return _empty;
+}
+
+/*
+ * converts bytes to kilobytes.
+ * 
+ * _IN:
+ *      _bytes: number of bytes to be converted
+ * 
+ * _RETURNS: the converted number in kilobytes
+ */
+long double byteToKilo(unsigned long long _bytes)
+{
+    return _bytes / 1024.0l;
+}
+
+/*
+ * converts bytes to megabytes.
+ * 
+ * _IN:
+ *      _bytes: number of bytes to be converted
+ * 
+ * _RETURNS: the converted number in megabytes
+ */
+long double byteToMega(unsigned long long _bytes)
+{
+    return _bytes / 1024.0l / 1024.0l;
+}
+
+/*
+ * converts bytes to gigabytes.
+ * 
+ * _IN:
+ *      _bytes: number of bytes to be converted
+ * 
+ * _RETURNS: the converted number in gigabytes
+ */
+long double byteToGiga(unsigned long long _bytes)
+{
+    return _bytes / 1024.0l / 1024.0l / 1024.0l;
+}
+
+/*
+ * converts megaherz to gigaherz.
+ * 
+ * _IN:
+ *      _bytes: number of megaherz to be converted
+ * 
+ * _RETURNS: the converted number in gigaherz
+ */
+double mhzToGhz(long _hz)
+{
+    return _hz / 1000.0l;
+}
+
+/*
+ * takes a substring out of a bigger string and writes
+ * it to a new location.
+ * 
+ * the new string will be null-terminated, so the target
+ * location has to be at least _length + 1.
+ * source string is not altered.
+ * 
+ * _IN:
+ *      _string: the source-string
+ *      _start: the position where the substring starts
+ *      _length: the lengts of the substring
+ * 
+ * _OUT:
+ *      _substring: the location to store the substring into
+ * 
+ * _RETURNS: the number of charakters copied or (0) on error
+ */
+int subString(char *_string, char *_substring, int _start, int _length)
+{
+    size_t aLength = sizeof(_substring) / sizeof(_substring[0]);
+
+    if (!_string || !_substring || _start < 0 || _length <= 0 || _length > aLength-1)
+        return 0;
+
+    int i;
+
+    for(i = 0; i < _length; ++i)
+    {
+        _substring[i] = _string[_start + i];
+    }
+
+    _substring[_length] = '\0';
+
+    return i;
 }
 
 #endif // _TERMTOOLS_H

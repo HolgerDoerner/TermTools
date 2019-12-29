@@ -4,6 +4,7 @@
     "cmake.configureOnOpen": true,
     "files.associations": {
         "*.c": "c",
-        "*.h": "c"
+        "*.h": "c",
+        "*.in": "cpp"
     }
 }

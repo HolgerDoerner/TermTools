@@ -33,12 +33,6 @@
  * GitHub: https://GitHub.com/HolgerDoerner/TermTools
  */
 
-// Version info
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 5
-#define VERSION_PATCH 5
-#define VERSION_DATE "2019-12-26"
-
 #define _CRT_SECURE_NO_WARNINGS
 #define WIN32_LEAN_AND_MEAN
 #define USE_LIBCMT
@@ -68,6 +62,7 @@
 #include <curses.h>
 
 #include "termtools.h"
+#include "pager_version.h"
 
 #define TOP 0
 #define BOTTOM 1
@@ -485,7 +480,7 @@ void cleanup(SETTINGS *_settings)
  */
 void version()
 {
-    printf("Version: %d.%d.%d (%s)\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_DATE);
+    printf("Version: %s\n", PAGER_VERSION);
 }
 
 /*

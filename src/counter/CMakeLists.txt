@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.0)
 
 project(counter VERSION 0.1.0 LANGUAGES C)
 
+configure_file(${PROJECT_SOURCE_DIR}/counter_version.h.in
+                ${PROJECT_SOURCE_DIR}/counter_version.h
+                WIN32)
+
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
 
