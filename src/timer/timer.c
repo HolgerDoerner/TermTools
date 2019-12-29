@@ -70,6 +70,8 @@ int main(int argc, char **argv)
         if (feof(pStdout)) break;
 
     int subprocess_returncode = _pclose(pStdout);
+    
+    // int subprocess_returncode = system(argv[1]);
 
     QueryPerformanceCounter(&end); // end measurement
 
@@ -137,6 +139,6 @@ void printHelp()
     printf("\tCOMMAND       - The command to measure\n");
     printf("\t/?            - Print help\n");
     printf("\n");
-    printf("If the command takes Arguments ba itself, it's call has to be quoted\n");
-    printf("eg: \"DIR /S C:\\Windows\\System32\"\n");
+    printf("If the command takes Arguments by itself, it's call has to be quoted.\n");
+    printf("Eg: timer.exe \"DIR /S C:\\Windows\\System32\"\n");
 }
