@@ -14,7 +14,9 @@ A collection of tools for the terminal written in C. They are first and foremost
   - [Why not Java or better, C#? Especialy on Windows?](#why-not-java-or-better-c-especialy-on-windows)
 
 # About
-This collection of tools for the Windows Command-Line is a small side-/hobby-project i wanted to do for quite a long time. I always felt sad about some funktionality which we can take for given when working on the terminal in other OS-es but are missing on Windows. I dont try to produce high-polished applications to satisfy anybody, just no-nonesense get-the-job-done tools, nothing more or less. Yes I know there is PowerShell, but I love to write native applications, especialy in C.
+This collection of tools for the Windows Command-Line is a small side-/hobby-project i wanted to do for quite a long time. I always felt sad about some funktionality which we can take for given when working on the terminal in other OS-es but are missing on Windows. Yes I know there is PowerShell, but I love to write native applications, especialy in C. Also, those tools work regardless of the used shell (cmd.exe, PowerShell). I don't try to produce high-polished applications to satisfy anybody, just no-nonesense get-the-job-done tools, nothing more or less.
+
+The implementations are as simple as possible, no fancy stuff if not ABSOLUTLY needed. As I already said, just get the job done...
 
 The tools are not meant to be clones or re-implementations of other well-known applications, mostly from the Linux-World, but they are of course highly inspired by them.
 

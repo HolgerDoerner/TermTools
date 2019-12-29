@@ -252,7 +252,7 @@ void printOutput(SYSINFO *_sysinfo)
 	printf("\x1b[36m 11111111111111  1111111111111111111\x1b[0m \x1b[33m%10s:\x1b[0m %.2Lf GB\n", "RAM", byteToGiga(strtoull(_sysinfo->COMPUTERSYSTEM_TotalPhysicalMemory, (char **)NULL, 10)));
 	printf("\x1b[36m 11111111111111  1111111111111111111\x1b[0m \x1b[33m%10s:\x1b[0m %s", "CPU", _sysinfo->CPU_Name);
 	printf("\x1b[36m 11111111111111  1111111111111111111\x1b[0m %10s  %s", "", _sysinfo->CPU_SocketDesignation);
-	printf("\x1b[36m 11111111111111  1111111111111111111\x1b[0m %10s  %d x %.2f Ghz\n", "", strtoul(_sysinfo->CPU_NumberOfCores, (char **)NULL, 10), mhzToGhz(strtol(_sysinfo->CPU_MaxClockSpeed, (char **)NULL, 10)));
+	printf("\x1b[36m 11111111111111  1111111111111111111\x1b[0m %10s  %d x %.2f Ghz\n", "", (int)strtol(_sysinfo->CPU_NumberOfCores, (char **)NULL, 10), mhzToGhz(strtol(_sysinfo->CPU_MaxClockSpeed, (char **)NULL, 10)));
 	printf("\x1b[36m 11111111111111  1111111111111111111\x1b[0m \x1b[33m%10s:\x1b[0m %s", "GPU", _sysinfo->GPU_Name);
 	printf("\x1b[36m       11111111  1111111111111111111\x1b[0m %10s  %s", "", _sysinfo->GPU_DriverVersion);
 	printf("\x1b[36m                     111111111111111\x1b[0m %10s  %.2Lf GB\n", "", byteToGiga(strtoull(_sysinfo->GPU_AdapterRAM, (char **)NULL, 10)));
