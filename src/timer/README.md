@@ -1,11 +1,18 @@
-# winfetch - display system information
-A small utility to display system information in the terminal, inspired by *screenfetch*.
+# timer - Measures duration
+A small utility to measure and display the duration of commands.
 
-Not beautiful but fast :-)
+It shows the number of Ticks elapsed and breaks them down to hours, minutes, seconds, milliseconds and microseconds.
 
 ## Usage
-Just launch `winfetch.exe` on the command-line.
+`timer.exe [/?] <COMMAND>`
+
+Arguments:
+
+    COMMAND       - The command to measure
+    /?            - Print help
+
+If the command takes Arguments ba itself, it's call has to be quoted
+eg: `"DIR /S C:\Windows\System32"`.
 
 ## Known Bugs/Missing Features
-- Windows-Logo is ugly.
-- relies on `WMIC` to gather the information but this tool is deprecated by Microsoft.
+- hmm, still searching...

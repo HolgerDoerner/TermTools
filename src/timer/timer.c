@@ -45,34 +45,98 @@
 #include "timer_version.h"
 #include "termtools.h"
 
+void parseArgs(int, char**);
+void printHelp(void);
+
 int main(int argc, char **argv)
 {
-    struct timeb start, end;
-    int diff;
-    int i = 0;
-    ftime(&start);
+    parseArgs(argc, argv);
+
+    LARGE_INTEGER start, end, diff;
+    LARGE_INTEGER frequency;
+    QueryPerformanceFrequency(&frequency);
+
+    QueryPerformanceCounter(&start); // start measurement
 
     FILE *pStdout = _popen(argv[1],"rt");
     if (!pStdout)
     {
-        perror("* ERROR");
+        if (errno) perror("* ERROR");
         exit(EXIT_FAILURE);
     }
 
     char dummy[BUFSIZ];
-
-    while (fgets(dummy, BUFSIZ-1, pStdout))
+    while (fgets(dummy, BUFSIZ, pStdout))
         if (feof(pStdout)) break;
 
-    fclose(pStdout);
+    int subprocess_returncode = _pclose(pStdout);
 
-    ftime(&end);
-    diff = (int) (1000.0 * (end.time - start.time)
-        + (end.millitm - start.millitm));
+    QueryPerformanceCounter(&end); // end measurement
 
-    printf("%lld\n", start.time);
-    printf("%lld\n", end.time);
-    printf("%d\n", diff);
+    LONGLONG ticks = diff.QuadPart = end.QuadPart - start.QuadPart;
+    diff.QuadPart *= 1000000; // convert ticks to microseconds
+    diff.QuadPart /= frequency.QuadPart;
 
-    return 0;
+    LONGLONG hours = diff.QuadPart / 3600000000;
+    diff.QuadPart %= 3600000000;
+    LONGLONG minutes = diff.QuadPart / 60000000;
+    diff.QuadPart %= 60000000;
+    LONGLONG seconds = diff.QuadPart / 1000000;
+    diff.QuadPart %= 1000000;
+    LONGLONG milliseconds = diff.QuadPart / 1000;
+    diff.QuadPart %= 1000;
+    LONGLONG microseconds = diff.QuadPart;
+
+    printf("Ticks:        %I64d\n", ticks);
+    printf("\n");
+    printf("Hours:        %I64d\n", hours);
+    printf("Minutes:      %I64d\n", minutes);
+    printf("Seconds:      %I64d\n", seconds);
+    printf("Milliseconds: %I64d\n", milliseconds);
+    printf("Microseconds: %I64d\n", microseconds);
+
+    if (subprocess_returncode != EXIT_SUCCESS)
+    {
+        printf("\n");
+        printf("Sub-Command returned with Code: %d\n", subprocess_returncode);
+    }
+
+    return EXIT_SUCCESS;
+}
+
+void parseArgs(int _argc, char **_argv)
+{
+    if (_argc == 1)
+    {
+        printHelp();
+        exit(EXIT_SUCCESS);
+    }
+    else if (_argv[1][0] == '/')
+    {
+        if (_stricmp(_argv[1], "/?") == 0)
+        {
+            printHelp();
+            exit(EXIT_SUCCESS);
+        }
+        else
+        {
+            fprintf(stderr, "* ERROR: Unknown argument: %s\n", _argv[1]);
+            exit(EXIT_FAILURE);
+        }
+    }
+}
+
+void printHelp()
+{
+    printf("timer v%s\n", TIMER_VERSION);
+    printf("\n");
+    printf("Usage:\n");
+    printf("\ttimer.exe [/?] <COMMAND>\n");
+    printf("\n");
+    printf("Arguments:\n");
+    printf("\tCOMMAND       - The command to measure\n");
+    printf("\t/?            - Print help\n");
+    printf("\n");
+    printf("If the command takes Arguments ba itself, it's call has to be quoted\n");
+    printf("eg: \"DIR /S C:\\Windows\\System32\"\n");
 }

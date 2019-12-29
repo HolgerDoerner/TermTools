@@ -81,6 +81,8 @@ typedef struct SYSINFO {
     char *GPU_VideoModeDescription;
 } SYSINFO;
 
+void parseArgs(int, char**);
+void printHelp(void);
 void printOutput(SYSINFO *);
 int getOSInfo(SYSINFO *);
 int getBASEBOARDInfo(SYSINFO *);
@@ -124,6 +126,8 @@ int main(int argc, char **argv)
         .GPU_Name = "\n",
         .GPU_VideoModeDescription = "\n"
     };
+
+    parseArgs(argc, argv);
 
     // Set output mode to handle virtual terminal sequences
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -179,6 +183,53 @@ int main(int argc, char **argv)
 }
 
 /*
+ * parses the commandline-arguments.
+ * 
+ * _IN:
+ *      _argc: the number of arguments
+ *      _argv: the vector of arguments
+ */
+void parseArgs(int _argc, char **_argv)
+{
+    if (_argc > 1)
+    {
+        if (_argv[1][0] == '/')
+        {
+            if (_stricmp(_argv[1], "/?") == 0)
+            {
+                printHelp();
+                exit(EXIT_SUCCESS);
+            }
+            else
+            {
+                fprintf(stderr, "* ERROR: Unknown argument: %s\n", _argv[1]);
+                exit(EXIT_FAILURE);
+            }
+        }
+        else
+        {
+            fprintf(stderr, "* ERROR: Unknown argument: %s\n", _argv[1]);
+            exit(EXIT_FAILURE);
+        }
+    }
+}
+
+/*
+ * shows help-message and version.
+ */
+void printHelp()
+{
+    printf("winfetch v%s\n", WINFETCH_VERSION);
+    printf("\n");
+    printf("Usage:\n");
+    printf("\twinfetch.exe [/?]\n");
+    printf("\n");
+    printf("Arguments:\n");
+    printf("\t/?    - Print help\n");
+    printf("\n");
+}
+
+/*
  * writes the final output to the terminal.
  * 
  * _IN:
@@ -210,7 +261,7 @@ void printOutput(SYSINFO *_sysinfo)
     printf("\n");
 	printf(" \x1b[7m TERMTOOLS: %s - WINFETCH: %s \x1b[0m\n", TT_VERSION, WINFETCH_VERSION);
 
-    // keep printing empty lines so we fill exactly the theterminal window
+    // keep printing empty lines to fill exactly the terminal window
     for (int i = 26; i < _sysinfo->term_rows; ++i)
         printf("\n");
 }
@@ -624,15 +675,15 @@ char *calculateUptime(SYSINFO *_sysinfo)
     time_t curr_t = time(NULL);
     unsigned long long diff_t = (unsigned long)difftime(curr_t, boot_t);
 
-    int years   = (int)(diff_t/378432000);
+    int years   = (int)(diff_t / 378432000);
     diff_t %= 378432000;
-    int months  = (int)(diff_t/31536000);
+    int months  = (int)(diff_t / 31536000);
     diff_t %= 31536000;
-    int days    = (int)(diff_t/86400);
+    int days    = (int)(diff_t / 86400);
     diff_t %= 86400;
-    int hours   = (int)(diff_t/3600);
+    int hours   = (int)(diff_t / 3600);
     diff_t %= 3600;
-    int minutes = (int)(diff_t/60);
+    int minutes = (int)(diff_t / 60);
     diff_t %= 60;
     int seconds = (int)diff_t;
 
