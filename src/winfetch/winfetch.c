@@ -650,7 +650,6 @@ char *calculateUptime(SYSINFO *_sysinfo)
 
     struct tm tm_boot = {0};
     tm_boot.tm_isdst = -1;
-    tm_boot.tm_year = 71;
 
     subString(_sysinfo->OS_LastBootUpTime, tmp, 0, 4);
     tm_boot.tm_year = (int)strtol(tmp, (char **)NULL, 10) - 1900;
