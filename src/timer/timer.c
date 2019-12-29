@@ -58,24 +58,24 @@ int main(int argc, char **argv)
 
     QueryPerformanceCounter(&start); // start measurement
 
-    FILE *pStdout = _popen(argv[1],"rt");
-    if (!pStdout)
-    {
-        if (errno) perror("* ERROR");
-        exit(EXIT_FAILURE);
-    }
+    // FILE *pStdout = _popen(argv[1],"rt");
+    // if (!pStdout)
+    // {
+    //     if (errno) perror("* ERROR");
+    //     exit(EXIT_FAILURE);
+    // }
 
-    char dummy[BUFSIZ];
-    while (fgets(dummy, BUFSIZ, pStdout))
-        if (feof(pStdout)) break;
+    // char dummy[BUFSIZ];
+    // while (fgets(dummy, BUFSIZ, pStdout))
+    //     if (feof(pStdout)) break;
 
-    int subprocess_returncode = _pclose(pStdout);
+    // int subprocess_returncode = _pclose(pStdout);
     
-    // int subprocess_returncode = system(argv[1]);
+    int subprocess_returncode = system(argv[1]);
 
     QueryPerformanceCounter(&end); // end measurement
 
-    LONGLONG ticks = diff.QuadPart = end.QuadPart - start.QuadPart;
+    diff.QuadPart = end.QuadPart - start.QuadPart;
     diff.QuadPart *= 1000000; // convert ticks to microseconds
     diff.QuadPart /= frequency.QuadPart;
 
@@ -89,8 +89,6 @@ int main(int argc, char **argv)
     diff.QuadPart %= 1000;
     LONGLONG microseconds = diff.QuadPart;
 
-    printf("Ticks:        %I64d\n", ticks);
-    printf("\n");
     printf("Hours:        %I64d\n", hours);
     printf("Minutes:      %I64d\n", minutes);
     printf("Seconds:      %I64d\n", seconds);

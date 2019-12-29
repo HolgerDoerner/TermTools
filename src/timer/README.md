@@ -14,4 +14,4 @@ Arguments:
 If the command takes Arguments by itself, it's call has to be quoted eg: `timer.exe "DIR /S C:\Windows\System32"`.
 
 ## Known Bugs/Missing Features
-- problems with programs not writing any output to STDOUT, timer than hangs forever.
+- still searching them...
