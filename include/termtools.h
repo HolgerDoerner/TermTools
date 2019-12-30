@@ -88,7 +88,7 @@ unsigned char countDigits(long long _number)
 }
 
 /*
- * checks for blank lines/strings.
+ * checks for blank strings.
  * 
  * 'blank' means, the string doesn't contain any printable charakters,
  * but it still MAY contain control charakters like '\n', '\r\n', '\t',
@@ -97,22 +97,20 @@ unsigned char countDigits(long long _number)
  * An EMPTY string ("") is ALSO BLANK!
  * 
  * _IN:
- *      _line: the line/string to check
+ *      _line: the string to check
  * 
  * _RETURNS: 0 (FALSE) if contains printable charakters, otherwise 1 (TRUE)
  */
-int isLineBlank(char *_line)
+bool isStringBlank(char *_line, size_t _length)
 {
-    if (!_line) return 0;
-
-    size_t len = strlen(_line);
-    if (len < 1) return 0;
+    if (!_line || _length < 1) return true;
 
     bool _empty = true;
 
-    for (int i = 0; i < len; ++i)
+    for (int i = 0; i < _length; ++i)
     {
         if (iswprint(_line[i])) _empty = false;
+        else if (_line[i] == '\0') break;
     }
 
     return _empty;

@@ -6,19 +6,21 @@ A collection of tools for the terminal written in C. They are first and foremost
 
 - [About](#about)
 - [Included Tools](#included-tools)
+- [Pre-Compiled Binaries](#pre-compiled-binaries)
 - [Build](#build)
   - [Requirements](#requirements)
   - [Getting startet on the command-line](#getting-startet-on-the-command-line)
+    - [Configure Environment after installing](#configure-environment-after-installing)
 - [FAQ](#faq)
   - [Why in the hell C ?](#why-in-the-hell-c)
   - [Why not Java or better, C#? Especialy on Windows?](#why-not-java-or-better-c-especialy-on-windows)
 
 # About
-This collection of tools for the Windows Command-Line is a small side-/hobby-project i wanted to do for quite a long time. I always felt sad about some funktionality which we can take for given when working on the terminal in other OS-es but are missing on Windows. Yes I know there is PowerShell, but I love to write native applications, especialy in C. Also, those tools work regardless of the used shell (cmd.exe, PowerShell). I don't try to produce high-polished applications to satisfy anybody, just no-nonesense get-the-job-done tools, nothing more or less.
+This collection of tools for the Windows Command-Line is a small side-/hobby-project i wanted to do for quite a long time. I always felt sad about some funktionality which we can take for given when working on the terminal in other OS-es but are missing on Windows. Yes I know there is PowerShell and WSL and those are great, but I love to write native applications, especialy in C. Also, those tools work regardless of the used shell (cmd.exe, PowerShell).
 
-The implementations are as simple as possible, no fancy stuff if not ABSOLUTLY needed. As I already said, just get the job done...
+Also those tools are not meant to be clones or re-implementations of other well-known applications, mostly from the Linux-World, but they are of course highly inspired by them. The implementations are as simple as possible, no fancy stuff if not ABSOLUTLY needed. Just no-nonsense get-the-job-done stuff...
 
-The tools are not meant to be clones or re-implementations of other well-known applications, mostly from the Linux-World, but they are of course highly inspired by them.
+***Further Notes:*** I target the more recent versions of Windows 10 and Windows Server, and I don't test on older ones. So, if You really need dem to run on Windows XP or similar and they dont't, open a ticket and I will see what I can do for You 😉.
 
 # Included Tools
 NAME | DESCRIPTION
@@ -27,6 +29,12 @@ pager | A terminal pager. More like less...
 counter | Simple counter. Counts lines or words in text-files.
 winfetch | Displays System-Information on the terminal.
 timer | Measures duration of commands.
+
+# Pre-Compiled Binaries
+The provided pre-compiled binaries on the releases-page are all 64-bit, if not mentoned otherwise. If You really need 32-bit binaries, You have to compile them yourself (*see:* [Build](#build)).
+
+## Installing
+To use them, just extract the ZIP-archive to a location of Your choice (suggestion: `%USERPROFILE%\TermTools`) and update Your Environment-Settings (*see:* [Configure Environment after installing](#configure-environment-after-installing)).
 
 # Build
 ## Requirements
@@ -72,9 +80,20 @@ to compile all binaries, or pick one with
 
     C:\TermTools\build> nmake <TARGET_NAME>
 
-to get a list of available targets, type
+To get a list of available targets, type
 
     C:\TermTools\build> nmake help
+
+And to install the binaries do a
+
+    C:\TermTools\build> nmake install
+
+*Note:* Install needs a 'Release'-configuration!
+
+The default install_prefix is: `%USERPROFILE%\TermTools`.
+
+### Configure Environment after installing
+It makes sense to be abele to call the tools anytime from a terminal. To do this You have to set a new Environment-Variable `TERMTOOLS_HOME=%USERPROFILE%\TermTools` and append `TERMTOOLS_HOME` to Your User-`Path`.
 
 # FAQ
 ## Why in the hell *C* ?

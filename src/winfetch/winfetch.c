@@ -291,7 +291,7 @@ int getOSInfo(SYSINFO *_sysinfo)
 
     while (fgets(buff, STRINGLENTH-1, pStdout))
     {
-        if (isLineBlank(buff)) continue;
+        if (isStringBlank(buff, STRINGLENTH)) continue;
         snprintf(values[i++], STRINGLENTH-1, "%s", buff);
         if (feof(pStdout)) break;
     }
@@ -358,7 +358,7 @@ int getBASEBOARDInfo(SYSINFO *_sysinfo)
 
     while (fgets(buff, STRINGLENTH-1, pStdout))
     {
-        if (isLineBlank(buff)) continue;
+        if (isStringBlank(buff, STRINGLENTH)) continue;
         snprintf(values[i++], STRINGLENTH-1, "%s", buff);
         if (feof(pStdout)) break;
     }
@@ -401,7 +401,7 @@ int getBIOSInfo(SYSINFO *_sysinfo)
 
     while (fgets(buff, STRINGLENTH-1, pStdout))
     {
-        if (isLineBlank(buff)) continue;
+        if (isStringBlank(buff, STRINGLENTH)) continue;
         snprintf(values[i++], STRINGLENTH-1, "%s", buff);
         if (feof(pStdout)) break;
     }
@@ -446,7 +446,7 @@ int getCOMPUTERSYSTEMInfo(SYSINFO *_sysinfo)
 
     while (fgets(buff, STRINGLENTH-1, pStdout))
     {
-        if (isLineBlank(buff)) continue;
+        if (isStringBlank(buff, STRINGLENTH)) continue;
         snprintf(values[i++], STRINGLENTH-1, "%s", buff);
         if (feof(pStdout)) break;
     }
@@ -503,7 +503,7 @@ int getCPUInfo(SYSINFO *_sysinfo)
 
     while (fgets(buff, STRINGLENTH-1, pStdout))
     {
-        if (isLineBlank(buff)) continue;
+        if (isStringBlank(buff, STRINGLENTH)) continue;
         snprintf(values[i++], STRINGLENTH-1, "%s", buff);
         if (feof(pStdout)) break;
     }
@@ -562,7 +562,7 @@ int getTIMEZONEInfo(SYSINFO *_sysinfo)
 
     while (fgets(buff, STRINGLENTH-1, pStdout))
     {
-        if (isLineBlank(buff)) continue;
+        if (isStringBlank(buff, STRINGLENTH)) continue;
         snprintf(values[i++], STRINGLENTH-1, "%s", buff);
         if (feof(pStdout)) break;
     }
@@ -602,7 +602,7 @@ int getGPUInfo(SYSINFO *_sysinfo)
 
     while (fgets(buff, STRINGLENTH-1, pStdout))
     {
-        if (isLineBlank(buff)) continue;
+        if (isStringBlank(buff, STRINGLENTH)) continue;
         snprintf(values[i++], STRINGLENTH-1, "%s", buff);
         if (feof(pStdout)) break;
     }
@@ -636,7 +636,7 @@ int getGPUInfo(SYSINFO *_sysinfo)
  * IMPORTANT: LastBootUpTime may NOT be the time the machine was last
  * powered on! This is due to the fact that Windows 10 uses a mechanism
  * known as 'FastBoot' which suspends to harddrive rather than shutting
- * down completely to speed up booting. This does not affect REBOOTING,
+ * down completely to speed up booting. This does not affect RE-BOOTING,
  * the system, which always triggers a FULL shutdown and reboot.
  * 
  * _IN:

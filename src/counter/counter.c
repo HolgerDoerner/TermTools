@@ -76,7 +76,7 @@ int main(int argc, char **argv)
             exit(0);
     }
 
-    printf("%zd\n", ret);
+    printf("%zu\n", ret);
     
     return 0;
 }
@@ -150,7 +150,7 @@ size_t count(const char *fileName, short mode)
             }
         }
 
-        if (mode == CLINES && !isLineBlank(buffer)) ++counter;
+        if (mode == CLINES && !isStringBlank(buffer, BUFSIZ)) ++counter;
 
         if (feof(pFile)) break;
     }

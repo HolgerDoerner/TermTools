@@ -147,7 +147,11 @@ int main(int argc, char **argv)
     }
     else
     {
-        freopen("CON", "r", stdin);
+        if (!freopen("CON", "r", stdin))
+        {
+            perror("* ERROR");
+            exit(EXIT_FAILURE);
+        }
     }
     
     settings.term = initscr();
