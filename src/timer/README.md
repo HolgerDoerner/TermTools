@@ -3,6 +3,8 @@ A small utility to measure and display the duration of commands.
 
 It shows the number of Ticks elapsed and breaks them down to hours, minutes, seconds, milliseconds and microseconds.
 
+![Screenshot: timer](../../screenshots/timer_screenshot.png?raw=true "Screenshot: timer")
+
 ## Usage
 `timer.exe [/?] <COMMAND>`
 

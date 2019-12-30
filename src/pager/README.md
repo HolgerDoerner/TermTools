@@ -1,5 +1,7 @@
 # pager - A Terminal-Pager
-A small utility similar to *less*.
+A small terminal-pager utility similar to *less*.
+
+![Screenshot: pager](../../screenshots/pager_screenshot.png?raw=true "Screenshot: pager with Line-Numbers enabled")
 
 ## Usage
 ```pager.exe <filename>``` \
@@ -18,7 +20,7 @@ Controls:
     ?                       = help
     q                       = exit
 
-If a filename is given, it will be read. Otherwise pager.exe trys to read from 'stdin'.
+If a filename is given, it will be read. Otherwise pager.exe try's to read from 'stdin'.
 
 ## Known Bugs/Missing Features
 - lines longer than the with of the terminal are cut off, no linewrapping or horizontal scrolling atm...

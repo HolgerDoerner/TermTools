@@ -1,7 +1,7 @@
 # winfetch - display system information
 A small utility to display system information in the terminal, inspired by *screenfetch*.
 
-Not beautiful but fast :-)
+![Screenshot: winfetch](../../screenshots/winfetch_screenshot.png?raw=true "Screenshot: winfetch")
 
 ## Usage
 Just launch `winfetch.exe` on the command-line.
