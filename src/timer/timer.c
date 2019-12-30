@@ -57,19 +57,6 @@ int main(int argc, char **argv)
     QueryPerformanceFrequency(&frequency);
 
     QueryPerformanceCounter(&start); // start measurement
-
-    // FILE *pStdout = _popen(argv[1],"rt");
-    // if (!pStdout)
-    // {
-    //     if (errno) perror("* ERROR");
-    //     exit(EXIT_FAILURE);
-    // }
-
-    // char dummy[BUFSIZ];
-    // while (fgets(dummy, BUFSIZ, pStdout))
-    //     if (feof(pStdout)) break;
-
-    // int subprocess_returncode = _pclose(pStdout);
     
     int subprocess_returncode = system(argv[1]);
 

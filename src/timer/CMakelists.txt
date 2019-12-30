@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(timer VERSION 0.1.0 LANGUAGES C)
+project(timer VERSION 0.2.0 LANGUAGES C)
 
 configure_file(${PROJECT_SOURCE_DIR}/timer_version.h.in
                 ${PROJECT_SOURCE_DIR}/timer_version.h
@@ -12,3 +12,7 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
 add_executable(${PROJECT_NAME} timer.c)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME ${PROJECT_NAME})
+
+add_test(NAME timer_should_run_successful
+        WORKING_DIRECTORY ${TEST_FILES_DIR}
+        COMMAND ${PROJECT_NAME} dir)
