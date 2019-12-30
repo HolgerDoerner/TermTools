@@ -69,7 +69,8 @@ add_custom_command(TARGET "zip_release"
 set(TARGET_LIST pager
                 counter
                 winfetch
-                timer)
+                timer
+                hashsum)
 
 foreach(target ${TARGET_LIST})
     add_subdirectory(src/${target})

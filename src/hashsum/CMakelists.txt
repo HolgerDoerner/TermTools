@@ -1,0 +1,14 @@
+cmake_minimum_required(VERSION 3.0)
+
+project(hashsum VERSION 0.5.5 LANGUAGES C)
+
+configure_file(${PROJECT_SOURCE_DIR}/hashsum_version.h.in
+                ${PROJECT_SOURCE_DIR}/hashsum_version.h
+                WIN32)
+
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
+
+add_executable(${PROJECT_NAME} hashsum.c)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME ${PROJECT_NAME})
