@@ -1,4 +1,4 @@
-# pager - A simple counter.
+# counter - A simple counter.
 Counts lines or words in text-files.
 
 ## Usage
