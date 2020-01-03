@@ -137,7 +137,7 @@ size_t count(const char *fileName, short mode)
     char buffer[BUFSIZ];
     while (fgets(buffer, BUFSIZ, pFile))
     {
-        // if (isLineBlank(buffer)) continue;
+        if (isStringBlank(buffer, BUFSIZ)) continue;
 
         if (mode == CWORDS)
         {
@@ -150,7 +150,7 @@ size_t count(const char *fileName, short mode)
             }
         }
 
-        if (mode == CLINES && !isStringBlank(buffer, BUFSIZ)) ++counter;
+        if (mode == CLINES) ++counter;
 
         if (feof(pFile)) break;
     }

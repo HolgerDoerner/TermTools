@@ -37,15 +37,24 @@
 #define _TERMTOOLS_H
 
 #include "tt_version.h"
-// #define TT_VERSION_MAJOR 0
-// #define TT_VERSION_MINOR 3
-// #define TT_VERSION_PATCH 0
+
+#ifndef UNICODE 
+    #define UNICODE
+#endif
+
+#ifndef _UNICODE
+    #define _UNICODE
+#endif
+
+#define WIN32_LEAN_AND_MEAN
+#define USE_LIBCMT
 
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <locale.h>
 
 /*
  * returns the last element of a path.
@@ -97,7 +106,8 @@ unsigned char countDigits(long long _number)
  * An EMPTY string ("") is ALSO BLANK!
  * 
  * _IN:
- *      _line: the string to check
+ *      _line: the string to check (0-terminated)
+ *      _length: the length of the string
  * 
  * _RETURNS: 0 (FALSE) if contains printable charakters, otherwise 1 (TRUE)
  */
@@ -109,8 +119,40 @@ bool isStringBlank(char *_line, size_t _length)
 
     for (int i = 0; i < _length; ++i)
     {
-        if (iswprint(_line[i])) _empty = false;
+        // using the wide version of isgraph(), otherwise there could
+        // be an error if file is unicode and char is >255.
+        if (iswgraph(_line[i])) _empty = false;
         else if (_line[i] == '\0') break;
+    }
+
+    return _empty;
+}
+
+/*
+ * checks for blank unicode strings.
+ * 
+ * 'blank' means, the string doesn't contain any printable charakters,
+ * but it still MAY contain control charakters like '\n', '\r\n', '\t',
+ * '\0' or ' ' (whitespace) so it is *technicaly* not empty. A string
+ * is NOT blank if it contains at least 1 printable charakter.
+ * An EMPTY string ("") is ALSO BLANK!
+ * 
+ * _IN:
+ *      _string: the string to check (0-terminated)
+ *      _length: the length of the string
+ * 
+ * _RETURNS: 0 (FALSE) if contains printable charakters, otherwise 1 (TRUE)
+ */
+bool isStringBlankW(LPWSTR _string, SIZE_T _length)
+{
+    if (!_string || _length < 1) return true;
+
+    bool _empty = true;
+
+    for (int i = 0; i < _length; ++i)
+    {
+        if (iswgraph(_string[i])) _empty = false;
+        else if (_string[i] == '\0') break;
     }
 
     return _empty;
@@ -203,6 +245,32 @@ int subString(char *_string, char *_substring, int _start, int _length)
     _substring[_length] = '\0';
 
     return i;
+}
+
+/*
+ * converts a byte-buffer into an hexadecimal wide-string.
+ * 
+ * _IN:
+ *      _byteBuffer: the bytes to convert
+ *      _size: the size of the output-buffer
+ * 
+ * _OUT:
+ *      _outputBuffer: a wide-character buffer to write the final
+ *                      string into
+ * 
+ * _RETURNS: 0 on success or 1 if _byteBuffer or _outputBuffer are
+ *              NULL or _size is zero or negative
+ */
+int byteToHexStrW(PBYTE _byteBuffer, LPWSTR _outputBuffer, DWORD _size)
+{
+    if (!_byteBuffer || !_outputBuffer || _size < 1) return 1;
+
+    for(unsigned int j = 0; j < _size; j++)
+        wsprintfW(&_outputBuffer[2*j], L"%02X", _byteBuffer[j]);
+    
+    _outputBuffer[_size] = '\0';
+
+    return 0;
 }
 
 #endif // _TERMTOOLS_H
