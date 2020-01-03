@@ -33,24 +33,17 @@
  * GitHub: https://GitHub.com/HolgerDoerner/TermTools
  */
 
-#define _CRT_SECURE_NO_WARNINGS
-#define USE_LIBCMT
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "termtools.h"
 #include "counter_version.h"
 
 #define CLINES 0
 #define CWORDS 1
 
-short parseArgs(int, char **, char **);
-size_t count(const char *, short);
+short parseArgs(int, LPWSTR *, LPWSTR *);
+SIZE_T count(LPCWSTR, short);
 void usage(void);
 
-int main(int argc, char **argv)
+int wmain(int argc, LPWSTR *argv)
 {
     if (argc == 1)
     {
@@ -58,8 +51,8 @@ int main(int argc, char **argv)
         exit(0);
     }
 
-    size_t ret;
-    char *fileName;
+    SIZE_T ret;
+    LPWSTR fileName;
 
     switch (parseArgs(argc, argv, &fileName))
     {
@@ -76,12 +69,12 @@ int main(int argc, char **argv)
             exit(0);
     }
 
-    printf("%zu\n", ret);
+    wprintf(L"%zd\n", ret);
     
     return 0;
 }
 
-short parseArgs(int argc, char **argv, char **fileName)
+short parseArgs(int argc, LPWSTR *argv, LPWSTR *fileName)
 {
     int switchCount = 0;
     short retCode = 1;
@@ -90,19 +83,19 @@ short parseArgs(int argc, char **argv, char **fileName)
     {
         if (argv[i][0] == '/')
         {
-            if (_stricmp(argv[i], "/?") == 0)
+            if (_wcsicmp(argv[i], L"/?") == 0)
             {
                 retCode = 0;
                 break;
             }
-            else if (_stricmp(argv[i], "/w") == 0)
+            else if (_wcsicmp(argv[i], L"/w") == 0)
             {
                 ++switchCount;
                 retCode = 2;
             }
             else
             {
-                printf("Unkown parameter '%s'\n", argv[i]);
+                wprintf(L"Unkown parameter '%s'\n", argv[i]);
                 return -1;
             }
         }
@@ -120,33 +113,34 @@ short parseArgs(int argc, char **argv, char **fileName)
     return retCode;
 }
 
-size_t count(const char *fileName, short mode)
+SIZE_T count(LPCWSTR fileName, short mode)
 {
     FILE *pFile;
-    pFile = fopen(fileName, "r");
-    if (!pFile)
+    if (_wfopen_s(&pFile, fileName, L"r"))
     {
-        perror("* ERROR");
+        WCHAR errMsg[BUFSIZ];
+        _wcserror_s((WCHAR *)&errMsg, BUFSIZ, errno);
+        _fwprintf_p(stderr, L"* %s: %s\n", fileName, errMsg);
         exit(1);
     }
 
-    size_t counter = 0;
-    char delimeter[] = " \t\n";
-    char *tok;
+    SIZE_T counter = 0;
+    LPCWSTR delimeter = L" \t\n";
+    LPWSTR tok, context;
 
-    char buffer[BUFSIZ];
-    while (fgets(buffer, BUFSIZ, pFile))
+    WCHAR buffer[BUFSIZ];
+    while (fgetws(buffer, BUFSIZ-1, pFile))
     {
-        if (isStringBlank(buffer, BUFSIZ)) continue;
+        if (isStringBlankW(buffer, BUFSIZ)) continue;
 
         if (mode == CWORDS)
         {
-            tok = strtok(buffer, delimeter);
+            tok = wcstok_s(buffer, delimeter, &context);
 
             while (tok)
             {
                 ++counter;
-                tok = strtok(NULL, delimeter);
+                tok = wcstok_s(NULL, delimeter, &context);
             }
         }
 
@@ -166,12 +160,12 @@ size_t count(const char *fileName, short mode)
 
 void usage()
 {
-    printf("counter - Counts Lines or Words\n");
-    printf("\n");
-    printf("Usage:\n");
-    printf("\tcounter.exe [/W] <filename>\n");
-    printf("\n");
-    printf("Parameter:\n");
-    printf("\t/W            = counts words instead of lines\n");
-    printf("\t<filename>    = path/name of the file to read\n");
+    wprintf(L"counter - Counts Lines or Words\n");
+    wprintf(L"\n");
+    wprintf(L"Usage:\n");
+    wprintf(L"\tcounter.exe [/W] <filename>\n");
+    wprintf(L"\n");
+    wprintf(L"Parameter:\n");
+    wprintf(L"\t/W            = counts words instead of lines\n");
+    wprintf(L"\t<filename>    = path/name of the file to read\n");
 }

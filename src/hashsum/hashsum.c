@@ -430,7 +430,7 @@ LPWSTR calculateFileHash(SETTINGS *_settings, LPWSTR _fileName)
     LPWSTR lpwOutput = NULL;
 
     FILE *pFile;
-    if (_wfopen_s(&pFile, (const WCHAR *)_fileName, L"rb"))
+    if (_wfopen_s(&pFile, (LPCWSTR)_fileName, L"rb"))
     {
         WCHAR errMsg[BUFSIZ];
         _wcserror_s((WCHAR *)&errMsg, BUFSIZ, errno);
