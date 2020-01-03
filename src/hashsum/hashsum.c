@@ -358,7 +358,7 @@ SIZE_T readHashFile(LPWSTR **_pvFileNames, LPWSTR **_pvFileHashes, LPWSTR _fileN
         if ((pbHash = wcstok_s(inBuff, L" \t", &pbContext)) &&
             (pbFile = wcstok_s(NULL, L" \t", &pbContext)))
         {
-            pbFile[wcslen(pbFile)-1] = '\0';
+            pbFile[wcsnlen(pbFile, BUFSIZ)-1] = '\0';
         }
         else
         {
@@ -366,8 +366,8 @@ SIZE_T readHashFile(LPWSTR **_pvFileNames, LPWSTR **_pvFileHashes, LPWSTR _fileN
             continue;
         }
 
-        SIZE_T cFile = wcslen(pbFile) + 1;
-        SIZE_T cHash = wcslen(pbHash) + 1;
+        SIZE_T cFile = wcsnlen(pbFile, BUFSIZ) + 1;
+        SIZE_T cHash = wcsnlen(pbHash, 128) + 1;
         (*_pvFileNames)[counter] = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(WCHAR) * cFile); 
         (*_pvFileHashes)[counter] = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(WCHAR) * cHash);
         swprintf_s((*_pvFileNames)[counter], cFile, L"%s", pbFile);
@@ -490,7 +490,7 @@ LPWSTR calculateFileHash(SETTINGS *_settings, LPWSTR _fileName)
  */
 LPCWSTR getHashType(LPWSTR _hash)
 {
-    switch (wcslen(_hash))
+    switch (wcsnlen(_hash, 128))
     {
         case 32: return BCRYPT_MD5_ALGORITHM;
         case 40: return BCRYPT_SHA1_ALGORITHM;
