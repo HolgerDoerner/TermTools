@@ -33,22 +33,16 @@
  * GitHub: https://GitHub.com/HolgerDoerner/TermTools
  */
 
-
-#define _CRT_SECURE_NO_WARNINGS
-
-#include <windows.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <sys/timeb.h>
-
 #include "timer_version.h"
 #include "termtools.h"
 
-void parseArgs(int, char**);
+#include <time.h>
+#include <sys/timeb.h>
+
+void parseArgs(int, LPWSTR *);
 void printHelp(void);
 
-int main(int argc, char **argv)
+int wmain(int argc, LPWSTR *argv)
 {
     parseArgs(argc, argv);
 
@@ -58,7 +52,7 @@ int main(int argc, char **argv)
 
     QueryPerformanceCounter(&start); // start measurement
     
-    int subprocess_returncode = system(argv[1]);
+    int subprocess_returncode = _wsystem(argv[1]);
 
     QueryPerformanceCounter(&end); // end measurement
 
@@ -76,22 +70,22 @@ int main(int argc, char **argv)
     diff.QuadPart %= 1000;
     LONGLONG microseconds = diff.QuadPart;
 
-    printf("Hours:        %I64d\n", hours);
-    printf("Minutes:      %I64d\n", minutes);
-    printf("Seconds:      %I64d\n", seconds);
-    printf("Milliseconds: %I64d\n", milliseconds);
-    printf("Microseconds: %I64d\n", microseconds);
+    wprintf_s(L"Hours:        %I64d\n", hours);
+    wprintf_s(L"Minutes:      %I64d\n", minutes);
+    wprintf_s(L"Seconds:      %I64d\n", seconds);
+    wprintf_s(L"Milliseconds: %I64d\n", milliseconds);
+    wprintf_s(L"Microseconds: %I64d\n", microseconds);
 
     if (subprocess_returncode != EXIT_SUCCESS)
     {
-        printf("\n");
-        printf("Sub-Command returned with Code: %d\n", subprocess_returncode);
+        wprintf_s(L"\n");
+        wprintf_s(L"Sub-Command returned with Code: %d\n", subprocess_returncode);
     }
 
     return EXIT_SUCCESS;
 }
 
-void parseArgs(int _argc, char **_argv)
+void parseArgs(int _argc, LPWSTR *_argv)
 {
     if (_argc == 1)
     {
@@ -100,14 +94,14 @@ void parseArgs(int _argc, char **_argv)
     }
     else if (_argv[1][0] == '/')
     {
-        if (_stricmp(_argv[1], "/?") == 0)
+        if (_wcsicmp(_argv[1], L"/?") == 0)
         {
             printHelp();
             exit(EXIT_SUCCESS);
         }
         else
         {
-            fprintf(stderr, "* ERROR: Unknown argument: %s\n", _argv[1]);
+            fwprintf_s(stderr, L"* ERROR: Unknown argument: %s\n", _argv[1]);
             exit(EXIT_FAILURE);
         }
     }
@@ -115,15 +109,15 @@ void parseArgs(int _argc, char **_argv)
 
 void printHelp()
 {
-    printf("timer v%s\n", TIMER_VERSION);
-    printf("\n");
-    printf("Usage:\n");
-    printf("\ttimer.exe [/?] <COMMAND>\n");
-    printf("\n");
-    printf("Arguments:\n");
-    printf("\tCOMMAND       - The command to measure\n");
-    printf("\t/?            - Print help\n");
-    printf("\n");
-    printf("If the command takes Arguments by itself, it's call has to be quoted.\n");
-    printf("Eg: timer.exe \"DIR /S C:\\Windows\\System32\"\n");
+    wprintf_s(L"timer v%hs\n", TIMER_VERSION);
+    wprintf_s(L"\n");
+    wprintf_s(L"Usage:\n");
+    wprintf_s(L"\ttimer.exe [/?] <COMMAND>\n");
+    wprintf_s(L"\n");
+    wprintf_s(L"Arguments:\n");
+    wprintf_s(L"\tCOMMAND       - The command to measure\n");
+    wprintf_s(L"\t/?            - Print help\n");
+    wprintf_s(L"\n");
+    wprintf_s(L"If the command takes Arguments by itself, it's call has to be quoted.\n");
+    wprintf_s(L"Eg: timer.exe \"DIR /S C:\\Windows\\System32\"\n");
 }
