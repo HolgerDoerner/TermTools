@@ -119,7 +119,9 @@ bool isStringBlank(char *_line, size_t _length)
 
     for (int i = 0; i < _length; ++i)
     {
-        if (isgraph(_line[i])) _empty = false;
+        // using the wide version of isgraph(), otherwise there could
+        // be an error if file is unicode and char is >255.
+        if (iswgraph(_line[i])) _empty = false;
         else if (_line[i] == '\0') break;
     }
 

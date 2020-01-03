@@ -12,3 +12,21 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
 add_executable(${PROJECT_NAME} hashsum.c)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME ${PROJECT_NAME})
+
+add_test(NAME hashsum_calculate_sha256
+        WORKING_DIRECTORY ${TEST_FILES_DIR}
+        COMMAND ${PROJECT_NAME} /SHA256 test.txt)
+set_tests_properties(hashsum_calculate_sha256 PROPERTIES
+        PASS_REGULAR_EXPRESSION "ABFADB16BE9D22AFF6AA7EA5CD796FBFCB348693300E84EF6C0823A9DE6992EC  test.txt")
+
+add_test(NAME hashsum_calculate_md5
+        WORKING_DIRECTORY ${TEST_FILES_DIR}
+        COMMAND ${PROJECT_NAME} /MD5 test.txt)
+set_tests_properties(hashsum_calculate_md5 PROPERTIES
+        PASS_REGULAR_EXPRESSION "A60A2E3FF918C6B9971183195B8E4A98  test.txt")
+
+add_test(NAME hashsum_validate_testsums
+        WORKING_DIRECTORY ${TEST_FILES_DIR}
+        COMMAND ${PROJECT_NAME} /C testsums)
+set_tests_properties(hashsum_validate_testsums PROPERTIES
+        PASS_REGULAR_EXPRESSION "test.txt: OK")
