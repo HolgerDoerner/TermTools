@@ -25,7 +25,7 @@
  * For more information, please refer to <https://unlicense.org>
  * -----------------------------------------------------------------------
  * 
- * hashsum - calculates and checks hash digests
+ * hashsum - calculates and checks pbHash digests of files
  * 
  * Author: Holger Dörner <holger.doerner@gmail.com>
  * 
@@ -58,12 +58,12 @@ typedef struct SETTINGS {
     short mode;
 } SETTINGS;
 
-int parseArgs(SETTINGS *, LPWSTR **, size_t *, size_t, LPWSTR *);
+int parseArgs(SETTINGS *, LPWSTR **, SIZE_T *, SIZE_T, LPWSTR *);
 NTSTATUS initializeCryptoAPI(SETTINGS *);
-void checkHashValues(SETTINGS *, LPWSTR *, size_t);
-size_t readHashFile(LPWSTR **, LPWSTR **, LPWSTR);
-LPWSTR *calculateFilehashBatch(SETTINGS *, LPWSTR *, size_t);
-LPWSTR calculateFilehash(SETTINGS *, LPWSTR);
+void checkHashValues(SETTINGS *, LPWSTR *, SIZE_T);
+SIZE_T readHashFile(LPWSTR **, LPWSTR **, LPWSTR);
+LPWSTR *calculateFilehashBatch(SETTINGS *, LPWSTR *, SIZE_T);
+LPWSTR calculateFileHash(SETTINGS *, LPWSTR);
 LPCWSTR getHashType(LPWSTR);
 void cleanupCryptoAPI(SETTINGS *);
 void printHelp(void);
@@ -85,7 +85,7 @@ int wmain(int argc, LPWSTR *argv)
         .mode = MODE_NORMAL
     };
 
-    size_t cbArgs = 0;
+    SIZE_T cbArgs = 0;
     LPWSTR *pbArgs = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(LPWSTR) * argc-1);
     if (parseArgs(&settings, &pbArgs, &cbArgs, argc, argv))
         return EXIT_FAILURE;
@@ -99,6 +99,7 @@ int wmain(int argc, LPWSTR *argv)
 
     switch (settings.mode)
     {
+        // TODO: error handling
         case MODE_CHECK:
             checkHashValues(&settings, pbArgs, cbArgs);
             break;
@@ -113,9 +114,26 @@ int wmain(int argc, LPWSTR *argv)
     return 0;
 }
 
-int parseArgs(SETTINGS *_settings, LPWSTR **_filenames, size_t *_length, size_t _argc, LPWSTR *_argv)
+/*
+ * parses the command-line arguments.
+ * 
+ * _IN:
+ *      _argc: the total number of arguments passed on command-line
+ *      _argv: the original argument-vector recieved from command-line
+ * 
+ * _IN_OUT:
+ *      _settings: an SETTINGS-object
+ * 
+ * _OUT:
+ *      _pvFileNames: an vector large enough to contain the pbFile names passed
+ *                  on command-line
+ *      _cvFileNames: the length of the _pvFileNames
+ * 
+ * _RETURNS: 0 on success, >0 on error
+ */
+int parseArgs(SETTINGS *_settings, LPWSTR **_pvFileNames, SIZE_T *_cvFileNames, SIZE_T _argc, LPWSTR *_argv)
 {
-    if (!_settings || !_filenames || !_argv)
+    if (!_settings || !_pvFileNames || !_argv)
     {
         fwprintf_s(stderr, L"* ERROR: parseArgs(): one or more parameters are invalid\n");
         return 1;
@@ -126,45 +144,53 @@ int parseArgs(SETTINGS *_settings, LPWSTR **_filenames, size_t *_length, size_t 
         exit(EXIT_SUCCESS);
     }
 
-    *_length = 0;
+    (*_cvFileNames) = 0;
 
     for (int i = 1; i < _argc; ++i)
     {
-        if ((wchar_t)_argv[i][0] == L'/')
+        if ((WCHAR)_argv[i][0] == L'/')
         {
-            if (_wcsicmp((const wchar_t *)_argv[i], L"/?") == 0)
+            if (_wcsicmp((LPCWSTR)_argv[i], L"/?") == 0)
             {
                 printHelp();
                 exit(EXIT_SUCCESS);
             }
-            else if (_wcsicmp((const wchar_t *)_argv[i], L"/C") == 0)
+            else if (_wcsicmp((LPCWSTR)_argv[i], L"/C") == 0)
                 (*_settings).mode = MODE_CHECK;
-            else if (_wcsicmp((const wchar_t *)_argv[i], L"/SHA1") == 0)
+            else if (_wcsicmp((LPCWSTR)_argv[i], L"/SHA1") == 0)
                 (*_settings).pszAlgId = BCRYPT_SHA1_ALGORITHM;
-            else if (_wcsicmp((const wchar_t *)_argv[i], L"/SHA256") == 0)
+            else if (_wcsicmp((LPCWSTR)_argv[i], L"/SHA256") == 0)
                 (*_settings).pszAlgId = BCRYPT_SHA256_ALGORITHM;
-            else if (_wcsicmp((const wchar_t *)_argv[i], L"/SHA384") == 0)
+            else if (_wcsicmp((LPCWSTR)_argv[i], L"/SHA384") == 0)
                 (*_settings).pszAlgId = BCRYPT_SHA384_ALGORITHM;
-            else if (_wcsicmp((const wchar_t *)_argv[i], L"/SHA512") == 0)
+            else if (_wcsicmp((LPCWSTR)_argv[i], L"/SHA512") == 0)
                 (*_settings).pszAlgId = BCRYPT_SHA512_ALGORITHM;
-            else if (_wcsicmp((const wchar_t *)_argv[i], L"/MD5") == 0)
+            else if (_wcsicmp((LPCWSTR)_argv[i], L"/MD5") == 0)
                 (*_settings).pszAlgId = BCRYPT_MD5_ALGORITHM;
             else
             {
-                _fwprintf_p(stderr, L"* ERROR: Unknown parameter: %s\n", (const wchar_t *)_argv[i]);
+                _fwprintf_p(stderr, L"* ERROR: Unknown parameter: %s\n", _argv[i]);
                 printHelp();
                 return 1;
             }
         }
         else
         {
-            (*_filenames)[(*_length)++] = _argv[i];
+            (*_pvFileNames)[(*_cvFileNames)++] = _argv[i];
         }
     }
 
     return 0;
 }
 
+/*
+ * initializes the Windows Crypto API (CNG).
+ * 
+ * _IN_OUT:
+ *      _settings: an SETTINGS-object
+ * 
+ * _RETURNS: 0x00000000 on success, errorcode on failure (NT Error-Codes)
+ */
 NTSTATUS initializeCryptoAPI(SETTINGS *_settings)
 {
     if(((*_settings).status = BCryptOpenAlgorithmProvider(&_settings->hAlg, _settings->pszAlgId, NULL, BCRYPT_HASH_REUSABLE_FLAG)))
@@ -205,23 +231,38 @@ NTSTATUS initializeCryptoAPI(SETTINGS *_settings)
 
     if(((*_settings).status = BCryptCreateHash(_settings->hAlg, &_settings->hHash, _settings->pbHashObject, _settings->cbHashObject, NULL, 0, 0)))
     {
-        fwprintf(stderr, L"* Error: creating hash failed with status: 0x%x\n", _settings->status);
+        fwprintf(stderr, L"* Error: creating pbHash failed with status: 0x%x\n", _settings->status);
         return _settings->status;
     }
 
     return STATUS_SUCCESSFUL;
 }
 
-void checkHashValues(SETTINGS *_settings, LPWSTR *_pbHashFiles, size_t _cbHashFiles)
+/*
+ * validates the hash-digests of file by comparing them to fresh calculated ones.
+ * this function can handle multiple hash-files and processes them in the same order
+ * as given on the command-line.
+ * it tries to guess which algorithem is used by calculating the length of the given
+ * hash and skips files whose algorithen could not be determined with a warning.
+ * ---------------------------------------------------------------------------------
+ * 
+ * _IN:
+ *      _pvHashFiles: a vector containing the names/paths of the hash-files
+ *      _cvHashFiles: the size of _pvHashFiles
+ * 
+ * _IN_OUT:
+ *      _settings: the application SETTINGS-object
+ */
+void checkHashValues(SETTINGS *_settings, LPWSTR *_pvHashFiles, SIZE_T _cvHashFiles)
 {
-    for (size_t i = 0; i < _cbHashFiles; ++i)
+    for (SIZE_T i = 0; i < _cvHashFiles; ++i)
     {
         LPWSTR *pbFileNames, *pbFileOutput;
 
-        size_t cPairs = readHashFile(&pbFileNames, &pbFileOutput, _pbHashFiles[i]);
+        SIZE_T cPairs = readHashFile(&pbFileNames, &pbFileOutput, _pvHashFiles[i]);
         if (cPairs <= 0 || !pbFileNames || !pbFileOutput) continue;
 
-        for (size_t j = 0; j < cPairs; ++j)
+        for (SIZE_T j = 0; j < cPairs; ++j)
         {
             LPCWSTR newPszLastAlgId = getHashType(pbFileOutput[j]);
             if (!newPszLastAlgId) 
@@ -241,7 +282,7 @@ void checkHashValues(SETTINGS *_settings, LPWSTR *_pbHashFiles, size_t _cbHashFi
                 }
             }
 
-            LPWSTR lpwCalculatedOutput = calculateFilehash(_settings, pbFileNames[j]);
+            LPWSTR lpwCalculatedOutput = calculateFileHash(_settings, pbFileNames[j]);
             LPCWSTR cmpResult = _wcsicmp(lpwCalculatedOutput, pbFileOutput[j]) ? L"FAILED" : L"OK";
 
             wprintf_s(L"%s: %s\n", pbFileNames[j], cmpResult);
@@ -256,19 +297,35 @@ void checkHashValues(SETTINGS *_settings, LPWSTR *_pbHashFiles, size_t _cbHashFi
     }
 }
 
-size_t readHashFile(LPWSTR **_pbFileNames, LPWSTR **_pbFileOutput, LPWSTR _fileName)
+/*
+ * parses a hash-files for hash-filename-pairs.
+ * 
+ * skips linecomments starting with '#'.
+ * --------------------------------------------
+ * 
+ * _IN:
+ *      _fileName: the name/path of the hash-pbFile
+ * 
+ * _IN_OUT:
+ *      _pvFileNames: the parsed filenames
+ *      _pvFileHashes: the parsed hash-strings
+ * 
+ * _RETURNS: the size of the _pvFile*-vectors
+ */
+SIZE_T readHashFile(LPWSTR **_pvFileNames, LPWSTR **_pvFileHashes, LPWSTR _fileName)
 {
-    size_t counter = 0;
+    int allocCount = 2;
+    SIZE_T counter = 0;
 
-    if (! ((*_pbFileNames) = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(LPWSTR) * 20)) ||
-        ! ((*_pbFileOutput) = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(LPWSTR) * 20)))
+    if (! ((*_pvFileNames) = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(LPWSTR))) ||
+        ! ((*_pvFileHashes) = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(LPWSTR))))
     {
-        // we have to guard the calls to HeapFree to make sure we don't call it with NULL
-        if ((*_pbFileNames)) HeapFree(GetProcessHeap(), 0, (*_pbFileNames));
-        if ((*_pbFileOutput)) HeapFree(GetProcessHeap(), 0, (*_pbFileOutput));
+        // we have to guard the calls to HeapFree() to make sure we don't call it with NULL
+        if ((*_pvFileNames)) HeapFree(GetProcessHeap(), 0, (*_pvFileNames));
+        if ((*_pvFileHashes)) HeapFree(GetProcessHeap(), 0, (*_pvFileHashes));
 
-        (*_pbFileNames) = NULL;
-        (*_pbFileOutput) = NULL;
+        (*_pvFileNames) = NULL;
+        (*_pvFileHashes) = NULL;
 
         return counter;
     }
@@ -280,33 +337,48 @@ size_t readHashFile(LPWSTR **_pbFileNames, LPWSTR **_pbFileOutput, LPWSTR _fileN
         _wcserror_s((WCHAR *)&errMsg, BUFSIZ, errno);
         _fwprintf_p(stderr, L"* %s: %s\n", _fileName, errMsg);
 
-        HeapFree(GetProcessHeap(), 0, (*_pbFileNames));
-        HeapFree(GetProcessHeap(), 0, (*_pbFileOutput));
-        (*_pbFileNames) = NULL;
-        (*_pbFileOutput) = NULL;
+        HeapFree(GetProcessHeap(), 0, (*_pvFileNames));
+        HeapFree(GetProcessHeap(), 0, (*_pvFileHashes));
+        (*_pvFileNames) = NULL;
+        (*_pvFileHashes) = NULL;
         
         return counter;
     }
 
-    wchar_t inBuff[BUFSIZ*2];
+    WCHAR inBuff[BUFSIZ*2];
     while (fgetws(inBuff, (BUFSIZ*2)-1, pHashFile))
     {
         if (inBuff[0] == '#') continue; // TODO: better handling
+        else if (isStringBlankW(inBuff, BUFSIZ*2)) continue;
 
-        wchar_t *tmp;
+        LPWSTR pbContext;
+        LPWSTR pbHash;
+        LPWSTR pbFile;
 
-        wchar_t *hash = wcstok_s(inBuff, L" \t", &tmp);
-        wchar_t *file = wcstok_s(NULL, L" \t", &tmp);
-        file[wcslen(file)-1] = '\0';
+        if ((pbHash = wcstok_s(inBuff, L" \t", &pbContext)) &&
+            (pbFile = wcstok_s(NULL, L" \t", &pbContext)))
+        {
+            pbFile[wcslen(pbFile)-1] = '\0';
+        }
+        else
+        {
+            wprintf_s(L"* WARNING: Maleformatted Line: %zd\n", counter+1);
+            continue;
+        }
 
-        size_t cFile = wcslen(file) + 1;
-        size_t cHash = wcslen(hash) + 1;
-        (*_pbFileNames)[counter] = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(WCHAR) * cFile); 
-        (*_pbFileOutput)[counter] = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(WCHAR) * cHash);
-        swprintf_s((*_pbFileNames)[counter], cFile, L"%s", file);
-        swprintf_s((*_pbFileOutput)[counter], cHash, L"%s", hash);
+        SIZE_T cFile = wcslen(pbFile) + 1;
+        SIZE_T cHash = wcslen(pbHash) + 1;
+        (*_pvFileNames)[counter] = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(WCHAR) * cFile); 
+        (*_pvFileHashes)[counter] = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(WCHAR) * cHash);
+        swprintf_s((*_pvFileNames)[counter], cFile, L"%s", pbFile);
+        swprintf_s((*_pvFileHashes)[counter], cHash, L"%s", pbHash);
 
         if (feof(pHashFile)) break;
+
+        (*_pvFileNames) = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, (*_pvFileNames), sizeof(LPWSTR) * allocCount);
+        (*_pvFileHashes) = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, (*_pvFileHashes), sizeof(LPWSTR) * allocCount);
+
+        ++allocCount;
         ++counter;
     }
 
@@ -315,18 +387,45 @@ size_t readHashFile(LPWSTR **_pbFileNames, LPWSTR **_pbFileOutput, LPWSTR _fileN
     return counter;
 }
 
-LPWSTR *calculateFilehashBatch(SETTINGS *_settings, LPWSTR *_fileNames, size_t _cbArgs)
+/*
+ * calculates hash-digests for files in a batch.
+ * ---------------------------------------------
+ * TODO: error checking/handling
+ * ---------------------------------------------
+ * 
+ * _IN:
+ *      _settings: the application SETTINGS-object
+ *      _pvFileNames: a vector containing the names/paths of the files to hash
+ *      _cvFileNames: the size of the _pvFileNames vector
+ * 
+ * _RETURNS: a vector containing the calculated hashes, order matches the
+ *          _pvFileNames-vector
+ */
+LPWSTR *calculateFilehashBatch(SETTINGS *_settings, LPWSTR *_pvFileNames, SIZE_T _cvFileNames)
 {
-    LPWSTR *pbOutput = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(LPWSTR) * _cbArgs);
-    if (!pbOutput) return pbOutput;
+    LPWSTR *pbOutput;
+    if (! (pbOutput = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(LPWSTR) * _cvFileNames)))
+        return pbOutput;
 
-    for (int i = 0; i < _cbArgs; ++i)
-        pbOutput[i] = calculateFilehash(_settings, _fileNames[i]);
+    for (int i = 0; i < _cvFileNames; ++i)
+        pbOutput[i] = calculateFileHash(_settings, _pvFileNames[i]);
 
     return pbOutput;
 }
 
-LPWSTR calculateFilehash(SETTINGS *_settings, LPWSTR _fileName)
+/*
+ * calculate the hash-digest of a single file.
+ * -------------------------------------------
+ * 
+ * _IN:
+ *      _fileName: the name/path of the file to hash
+ * 
+ * _ON_OUT:
+ *      _settings: the application SETTINGS-object
+ * 
+ * _RETURNS: a string containing the calculated digest
+ */
+LPWSTR calculateFileHash(SETTINGS *_settings, LPWSTR _fileName)
 {
     LPWSTR lpwOutput = NULL;
 
@@ -339,12 +438,13 @@ LPWSTR calculateFilehash(SETTINGS *_settings, LPWSTR _fileName)
         return lpwOutput;
     }
 
-    PBYTE buff = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(LPWSTR) * BUFSIZ);
-    if (!buff)return lpwOutput;
+    PBYTE buff;
+    if (! (buff = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(LPWSTR) * BUFSIZ)))
+        return lpwOutput;
 
     while (fread_s(buff, BUFSIZ, sizeof(BYTE), BUFSIZ, pFile))
     {
-        // hash the data
+        // pbHash the data
         if(((*_settings).status = BCryptHashData(_settings->hHash, buff, BUFSIZ, 0)))
         {
             fwprintf(stderr, L"* ERROR: hashing %s failed with code: %#x\n", _fileName, _settings->status);
@@ -354,26 +454,40 @@ LPWSTR calculateFilehash(SETTINGS *_settings, LPWSTR _fileName)
         if (feof(pFile)) break;
     }
     
-    // close the hash
+    // close the pbHash
     if(((*_settings).status = BCryptFinishHash(_settings->hHash, _settings->pbHash, _settings->cbHash, 0)))
     {
-        fwprintf(stderr, L"* ERROR: finishing hash failed with code: %#x\n", _settings->status);
+        fwprintf(stderr, L"* ERROR: finishing pbHash failed with code: %#x\n", _settings->status);
         return lpwOutput;
     }
 
-    lpwOutput = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(LPWSTR) * _settings->cbHash+1);
-    if (!lpwOutput) return lpwOutput;
+    if (! (lpwOutput = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(LPWSTR) * _settings->cbHash+1)))
+        return lpwOutput;
 
-    byteToHexStrW(_settings->pbHash, lpwOutput, _settings->cbHash * 2);
+    if (byteToHexStrW(_settings->pbHash, lpwOutput, _settings->cbHash * 2))
+    {
+        HeapFree(GetProcessHeap(), 0, lpwOutput);
+        return (lpwOutput = NULL);
+    }
 
     if (_settings->mode == MODE_NORMAL)
-        wprintf(L"%s %s\n", lpwOutput, _fileName);
+        wprintf(L"%s  %s\n", lpwOutput, _fileName);
 
     HeapFree(GetProcessHeap(), 0, buff);
 
     return lpwOutput;
 }
 
+/*
+ * determines the type of the hash-algorithem for a given hHash-string.
+ * -------------------------------------------------------------------
+ * 
+ * _IN:
+ *      _hash: a string containing a hash
+ * 
+ * _RETURNS: a constant string containing the name of the algorithem,
+ *          or NULL if algorithem could not be determined
+ */
 LPCWSTR getHashType(LPWSTR _hash)
 {
     switch (wcslen(_hash))
@@ -387,33 +501,47 @@ LPCWSTR getHashType(LPWSTR _hash)
     }
 }
 
+
+/*
+ * cleans up objects and heap-space used by the Crypto-API.
+ * --------------------------------------------------------
+ * 
+ * _IN:
+ *      _settings: the application SETTINGS
+ */
 void cleanupCryptoAPI(SETTINGS *_settings)
 {
     if(_settings->hAlg)
-    {
         BCryptCloseAlgorithmProvider(_settings->hAlg,0);
-    }
 
     if (_settings->hHash)    
-    {
         BCryptDestroyHash(_settings->hHash);
-    }
 
     if(_settings->pbHashObject)
-    {
-        HeapFree(GetProcessHeap(), 0, _settings->pbHashObject);
-    }
+        HeapFree(GetProcessHeap(), 0, (*_settings).pbHashObject);
 
     if(_settings->pbHash)
-    {
-        HeapFree(GetProcessHeap(), 0, _settings->pbHash);
-    }
+        HeapFree(GetProcessHeap(), 0, (*_settings).pbHash);
 }
 
+/*
+ * simple function printing application version and
+ * usage information.
+ */
 void printHelp()
 {
-    wprintf(L"hashsum.exe v%hs\n", HASHSUM_VERSION);
+    wprintf(L"HASHSUM.EXE v%hs\n", HASHSUM_VERSION);
     wprintf(L"\n");
     wprintf(L"Usage:\n");
-    wprintf(L"\thashsum.exe <file> [files ...]\n");
+    wprintf(L"\tHASHSUM.EXE [/MD5 /SHA1 /SHA256 /SHA384 /SHA512] <file> [files ...]\n");
+    wprintf(L"\tHASHSUM.EXE [/C] <hash-file> [hash-files ...]\n");
+    wprintf(L"\n");
+    wprintf(L"Options:\n");
+    wprintf(L"\t/?          = shows usage info\n");
+    wprintf(L"\t/C          = checks digests stored in hash-file(s)\n");
+    wprintf(L"\t/MD5        = generate MD5-Digest\n");
+    wprintf(L"\t/SHA1       = generate SHA1-Digest\n");
+    wprintf(L"\t/SHA256     = generate SHA256-Digest (default)\n");
+    wprintf(L"\t/SHA385     = generate SHA384-Digest\n");
+    wprintf(L"\t/SHA512     = generate SHA512-Digest\n");
 }

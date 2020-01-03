@@ -1,28 +1,36 @@
-# pager - A Terminal-Pager
-A small terminal-pager utility similar to *less*.
+# hashsum - Calculates Hash-Digests
+Command-Line utility to calculate and verify hash-digests of one or more files.
 
-![Screenshot: pager](../../screenshots/pager_screenshot.png?raw=true "Screenshot: pager with Line-Numbers enabled")
+Supportet Algorithems are:
+
+    MD5
+    SHA1
+    SHA256
+    SHA385
+    SHA512
+
+The (only) currently supported format for hash-files is:
+
+    # line-comments are also supported
+    FA47C8661BB2669342D1A541BFDE150D  hashsum.exe
+
+While parsing a hash-file the application will try to determine the type of algorithem. A hash-file can also contain mixed types.
 
 ## Usage
-```pager.exe <filename>``` \
-    or \
-```other command | pager.exe```
+Usage:
+    
+    HASHSUM.EXE [/MD5 /SHA1 /SHA256 /SHA384 /SHA512] <file> [files ...]
+    HASHSUM.EXE [/C] <hash-file> [hash-files ...]
 
-Controls:
+Options:
 
-    j, ENTER, ARROW_DOWN    = scroll 1 line down
-    k, ARROW_UP             = scroll 1 line up
-    SPACE, PG_DOWN          = scroll 1 page down
-    b, PG_UP                = scroll 1 page up
-    g, HOME                 = jump to the beginning
-    G, END                  = jump to the end
-    v                       = show file in editor (exit pager)
-    ?                       = help
-    q                       = exit
-
-If a filename is given, it will be read. Otherwise pager.exe try's to read from 'stdin'.
+    /?          = shows usage info
+    /C          = checks digests stored in hash-file(s)
+    /MD5        = generate MD5-Digest
+    /SHA1       = generate SHA1-Digest
+    /SHA256     = generate SHA256-Digest (default)
+    /SHA385     = generate SHA384-Digest
+    /SHA512     = generate SHA512-Digest
 
 ## Known Bugs/Missing Features
-- lines longer than the with of the terminal are cut off, no linewrapping or horizontal scrolling atm...
-- no handling of terminal resizing, the application just exits if it detects resizing of the terminal.
-- crashes if input < than terminal hight.
+- only one supported format for hash-files.

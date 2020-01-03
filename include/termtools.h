@@ -106,7 +106,8 @@ unsigned char countDigits(long long _number)
  * An EMPTY string ("") is ALSO BLANK!
  * 
  * _IN:
- *      _line: the string to check
+ *      _line: the string to check (0-terminated)
+ *      _length: the length of the string
  * 
  * _RETURNS: 0 (FALSE) if contains printable charakters, otherwise 1 (TRUE)
  */
@@ -118,8 +119,38 @@ bool isStringBlank(char *_line, size_t _length)
 
     for (int i = 0; i < _length; ++i)
     {
-        if (iswprint(_line[i])) _empty = false;
+        if (isgraph(_line[i])) _empty = false;
         else if (_line[i] == '\0') break;
+    }
+
+    return _empty;
+}
+
+/*
+ * checks for blank unicode strings.
+ * 
+ * 'blank' means, the string doesn't contain any printable charakters,
+ * but it still MAY contain control charakters like '\n', '\r\n', '\t',
+ * '\0' or ' ' (whitespace) so it is *technicaly* not empty. A string
+ * is NOT blank if it contains at least 1 printable charakter.
+ * An EMPTY string ("") is ALSO BLANK!
+ * 
+ * _IN:
+ *      _string: the string to check (0-terminated)
+ *      _length: the length of the string
+ * 
+ * _RETURNS: 0 (FALSE) if contains printable charakters, otherwise 1 (TRUE)
+ */
+bool isStringBlankW(LPWSTR _string, SIZE_T _length)
+{
+    if (!_string || _length < 1) return true;
+
+    bool _empty = true;
+
+    for (int i = 0; i < _length; ++i)
+    {
+        if (iswgraph(_string[i])) _empty = false;
+        else if (_string[i] == '\0') break;
     }
 
     return _empty;

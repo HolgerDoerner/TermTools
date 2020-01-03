@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(hashsum VERSION 0.5.5 LANGUAGES C)
+project(hashsum VERSION 0.1.5 LANGUAGES C)
 
 configure_file(${PROJECT_SOURCE_DIR}/hashsum_version.h.in
                 ${PROJECT_SOURCE_DIR}/hashsum_version.h

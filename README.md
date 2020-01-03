@@ -7,6 +7,7 @@ A collection of tools for the terminal written in C. They are first and foremost
 - [About](#about)
 - [Included Tools](#included-tools)
 - [Pre-Compiled Binaries](#pre-compiled-binaries)
+  - [Installing](#installing)
 - [Build](#build)
   - [Requirements](#requirements)
   - [Getting startet on the command-line](#getting-startet-on-the-command-line)
@@ -29,6 +30,7 @@ pager | A terminal pager. More like less...
 counter | Simple counter. Counts lines or words in text-files.
 winfetch | Displays System-Information on the terminal.
 timer | Measures duration of commands.
+hashsum | Calculates Hash-Digests.
 
 # Pre-Compiled Binaries
 The provided pre-compiled binaries on the releases-page are all 64-bit, if not mentoned otherwise. If You really need 32-bit binaries, You have to compile them yourself (*see:* [Build](#build)).
