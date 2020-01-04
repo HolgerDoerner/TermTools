@@ -36,8 +36,6 @@
 #ifndef _TERMTOOLS_H
 #define _TERMTOOLS_H
 
-#include "tt_version.h"
-
 #ifndef UNICODE 
     #define UNICODE
 #endif
@@ -47,7 +45,9 @@
 #endif
 
 #define WIN32_LEAN_AND_MEAN
-#define USE_LIBCMT
+#define USE_LIBCMTD
+
+#include "tt_version.h"
 
 #include <windows.h>
 #include <stdio.h>
@@ -212,7 +212,7 @@ double mhzToGhz(long _hz)
 
 /*
  * takes a substring out of a bigger string and writes
- * it to a new location.
+ * it to a new location. unicode version.
  * 
  * the new string will be null-terminated, so the target
  * location has to be at least _length + 1.
@@ -228,11 +228,11 @@ double mhzToGhz(long _hz)
  * 
  * _RETURNS: the number of charakters copied or (0) on error
  */
-int subString(char *_string, char *_substring, int _start, int _length)
+int subStringW(LPWSTR _string, LPWSTR _substring, int _start, int _length)
 {
-    size_t aLength = sizeof(_substring) / sizeof(_substring[0]);
+    SIZE_T aLength = sizeof(_substring) / sizeof(_substring[0]);
 
-    if (!_string || !_substring || _start < 0 || _length <= 0 || _length > aLength-1)
+    if (!_string || !_substring || _start < 0 || _length <= 0 || _length > aLength)
         return 0;
 
     int i;
@@ -242,7 +242,7 @@ int subString(char *_string, char *_substring, int _start, int _length)
         _substring[i] = _string[_start + i];
     }
 
-    _substring[_length] = '\0';
+    _substring[_length] = L'\0';
 
     return i;
 }

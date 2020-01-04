@@ -34,18 +34,13 @@
  */
 
 #define _CRT_SECURE_NO_WARNINGS
-#define WIN32_LEAN_AND_MEAN
-#define USE_LIBCMT
+
 #pragma comment(lib, "user32.lib")
 #pragma comment(lib, "advapi32.lib")
 #pragma comment(lib, "pdcurses.lib")
 
-#include <windows.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <locale.h>
-#include <stdbool.h>
+#include "termtools.h"
+#include "pager_version.h"
 
 #ifdef MOUSE_MOVED
     #undef MOUSE_MOVED
@@ -61,8 +56,6 @@
 
 #include <curses.h>
 
-#include "termtools.h"
-#include "pager_version.h"
 
 #define TOP 0
 #define BOTTOM 1
