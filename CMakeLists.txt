@@ -33,7 +33,7 @@ ExternalProject_Add(PDCurses
     PREFIX ${3RD_PARTY}
     PATCH_COMMAND ""
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND cd ${3RD_PARTY}/src/PDCurses/wincon && nmake -f Makefile.vc WIDE=Y UTF8=Y
+    BUILD_COMMAND cd ${3RD_PARTY}/src/PDCurses/wincon && nmake -f Makefile.vc WIDE=Y
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
 )
