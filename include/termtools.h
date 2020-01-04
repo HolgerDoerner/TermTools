@@ -58,20 +58,22 @@
 
 /*
  * returns the last element of a path.
+ * unicode version.
  *
  * _IN:
- *      path: the full path
+ *      path: wide string containing the full path
  *
- * RETURNS: a pointer to the start of the last element
- *           or NULL.
+ * RETURNS: a pointer to the start of the last element,
+ *          or NULL if the path doesn't contain a path-
+ *          seperator or no last element is present.
  */
-const char *basename(const char *_path)
+LPCWSTR basenameW(LPCWSTR _path)
 {
     if (!_path) return NULL;
 
-    int pathsep = '\\'; //sorry, Windows only...
+    WCHAR pathsep = L'\\'; //sorry, Windows only...
 
-    const char *tmp = strrchr(_path, pathsep);
+    LPCWSTR tmp = wcsrchr(_path, pathsep);
     if (tmp) return ++tmp;
     else return tmp;
 }
@@ -94,38 +96,6 @@ unsigned char countDigits(long long _number)
     }
     
     return count;
-}
-
-/*
- * checks for blank strings.
- * 
- * 'blank' means, the string doesn't contain any printable charakters,
- * but it still MAY contain control charakters like '\n', '\r\n', '\t',
- * '\0' or ' ' (whitespace) so it is *technicaly* not empty. A string
- * is NOT blank if it contains at least 1 printable charakter.
- * An EMPTY string ("") is ALSO BLANK!
- * 
- * _IN:
- *      _line: the string to check (0-terminated)
- *      _length: the length of the string
- * 
- * _RETURNS: 0 (FALSE) if contains printable charakters, otherwise 1 (TRUE)
- */
-bool isStringBlank(char *_line, size_t _length)
-{
-    if (!_line || _length < 1) return true;
-
-    bool _empty = true;
-
-    for (int i = 0; i < _length; ++i)
-    {
-        // using the wide version of isgraph(), otherwise there could
-        // be an error if file is unicode and char is >255.
-        if (iswgraph(_line[i])) _empty = false;
-        else if (_line[i] == '\0') break;
-    }
-
-    return _empty;
 }
 
 /*
