@@ -56,7 +56,44 @@
 #include <stdbool.h>
 #include <locale.h>
 
-/*
+/**
+ * sets the locale to unicode.
+ * ---------------------------------------------------------------
+ * first, sets the locale for the application to the system locale
+ * defined in Windows, rater than the default "C". after this, it
+ * will set the locale to codepage "UTF-8" (65001).
+ * 
+ * Example: C -> de_DE.1252 -> de_DE.UTF-8
+ * 
+ * if the correct locale can not be determined, it will be set
+ * to "en_US.UTF-8".
+ * ---------------------------------------------------------------
+ */
+void setUnicodeLocale()
+{
+    LPWSTR pbOldLocale = _wsetlocale(LC_ALL, L"");
+    LPWSTR pbTmp = NULL, pbTokContext = NULL;
+
+    pbTmp = wcstok_s(pbOldLocale, L".", &pbTokContext);
+
+    if(pbTmp && _wcsicmp(pbTmp, L"C") != 0)
+    {
+        LPWSTR pbLocaleUnicode = NULL;
+        SIZE_T cbLocaleUnicode = (sizeof(WCHAR) * wcslen(pbTmp)) + 7;
+
+        pbLocaleUnicode = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, cbLocaleUnicode);
+        _snwprintf_s(pbLocaleUnicode, cbLocaleUnicode, cbLocaleUnicode-1, L"%s.UTF-8", pbTmp);
+
+        _wsetlocale(LC_ALL, pbLocaleUnicode);
+        HeapFree(GetProcessHeap(), 0, pbLocaleUnicode);
+    }
+    else
+    {
+        _wsetlocale(LC_ALL, L"en_US.UTF-8");
+    }
+}
+
+/**
  * returns the last element of a path.
  * unicode version.
  *
@@ -78,7 +115,7 @@ LPCWSTR basenameW(LPCWSTR _path)
     else return tmp;
 }
 
-/*
+/**
  * calculates the number of digits for a given number.
  *
  * _IN:
@@ -98,7 +135,7 @@ unsigned char countDigits(long long _number)
     return count;
 }
 
-/*
+/**
  * checks for blank unicode strings.
  * 
  * 'blank' means, the string doesn't contain any printable charakters,
@@ -128,7 +165,7 @@ bool isStringBlankW(LPWSTR _string, SIZE_T _length)
     return _empty;
 }
 
-/*
+/**
  * converts bytes to kilobytes.
  * 
  * _IN:
@@ -141,7 +178,7 @@ long double byteToKilo(unsigned long long _bytes)
     return _bytes / 1024.0l;
 }
 
-/*
+/**
  * converts bytes to megabytes.
  * 
  * _IN:
@@ -154,7 +191,7 @@ long double byteToMega(unsigned long long _bytes)
     return _bytes / 1024.0l / 1024.0l;
 }
 
-/*
+/**
  * converts bytes to gigabytes.
  * 
  * _IN:
@@ -167,7 +204,7 @@ long double byteToGiga(unsigned long long _bytes)
     return _bytes / 1024.0l / 1024.0l / 1024.0l;
 }
 
-/*
+/**
  * converts megaherz to gigaherz.
  * 
  * _IN:
@@ -180,7 +217,7 @@ double mhzToGhz(long _hz)
     return _hz / 1000.0l;
 }
 
-/*
+/**
  * takes a substring out of a bigger string and writes
  * it to a new location. unicode version.
  * 
@@ -217,8 +254,8 @@ int subStringW(LPWSTR _string, LPWSTR _substring, int _start, int _length)
     return i;
 }
 
-/*
- * converts a byte-buffer into an hexadecimal wide-string.
+/**
+ * converts a byte-buffer into an wide-string.
  * 
  * _IN:
  *      _byteBuffer: the bytes to convert

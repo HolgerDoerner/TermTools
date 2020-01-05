@@ -45,7 +45,6 @@ typedef struct SYSINFO {
     LPWSTR OS_LastBootUpTime;
 	LPWSTR OS_OSArchitecture;
 	LPWSTR OS_Version;
-	LPWSTR OS_MUILanguages;
     LPWSTR BASEBOARD_Manufacturer;
 	LPWSTR BASEBOARD_Product;
     LPWSTR BIOS_Manufacturer;
@@ -83,7 +82,7 @@ void cleanup(SYSINFO *);
 
 int wmain(int argc, LPWSTR *argv)
 {
-    setlocale(LC_ALL, "");
+    setUnicodeLocale();
 
     SYSINFO sysinfo = {
         .term_rows = 0,
@@ -91,7 +90,6 @@ int wmain(int argc, LPWSTR *argv)
         .OS_LastBootUpTime = L"\n",
         .OS_OSArchitecture = L"\n",
         .OS_Version = L"\n",
-        .OS_MUILanguages = L"\n",
         .BASEBOARD_Manufacturer = L"\n",
         .BASEBOARD_Product = L"\n",
         .BIOS_Manufacturer = L"\n",
@@ -188,8 +186,6 @@ void cleanup(SYSINFO *_sysinfo)
         HeapFree(GetProcessHeap(), 0, (*_sysinfo).OS_OSArchitecture);
 	if (_sysinfo->OS_Version[0] != L'\n')
         HeapFree(GetProcessHeap(), 0, (*_sysinfo).OS_Version);
-	if (_sysinfo->OS_MUILanguages[0] != L'\n')
-        HeapFree(GetProcessHeap(), 0, (*_sysinfo).OS_MUILanguages);
     if (_sysinfo->BASEBOARD_Manufacturer[0] != L'\n')
         HeapFree(GetProcessHeap(), 0, (*_sysinfo).BASEBOARD_Manufacturer);
 	if (_sysinfo->BASEBOARD_Product[0] != L'\n')
@@ -291,7 +287,7 @@ void printOutput(SYSINFO *_sysinfo)
     wprintf_s(L"\x1b[36m       11111111  1111111111111111111\x1b[0m \x1b[33m%10s:\x1b[0m %s", L"OS", _sysinfo->OS_Caption);
 	wprintf_s(L"\x1b[36m 11111111111111  1111111111111111111\x1b[0m %-10s  %s", L"", _sysinfo->OS_Version);
 	wprintf_s(L"\x1b[36m 11111111111111  1111111111111111111\x1b[0m %-10s  %s", L"", _sysinfo->OS_OSArchitecture);
-	wprintf_s(L"\x1b[36m 11111111111111  1111111111111111111\x1b[0m %-10s  %s", L"", _sysinfo->OS_MUILanguages);
+	wprintf_s(L"\x1b[36m 11111111111111  1111111111111111111\x1b[0m %-10s  %s\n", L"", _wsetlocale(LC_ALL, NULL));
 	wprintf_s(L"\x1b[36m 11111111111111  1111111111111111111\x1b[0m %-10s  %s", L"", _sysinfo->TIMEZONE_Caption);
 	wprintf_s(L"\x1b[36m 11111111111111  1111111111111111111\x1b[0m \x1b[33m%10s:\x1b[0m %s", L"Mainboard", _sysinfo->BASEBOARD_Manufacturer);
 	wprintf_s(L"\x1b[36m 11111111111111  1111111111111111111\x1b[0m %-10s  %s", L"", _sysinfo->BASEBOARD_Product);
@@ -328,12 +324,12 @@ int getOSInfo(SYSINFO *_sysinfo)
 
     FILE *pStdout;
     pStdout = _wpopen(L"wmic os get Version, Caption, OSArchitecture,"
-                        "MUILanguages, LastBootUpTime /value", L"rt");
+                        "LastBootUpTime /value", L"rt");
 
     if (!pStdout) return EXIT_FAILURE;
 
     WCHAR buff[STRINGLENTH];
-    WCHAR values[5][STRINGLENTH];
+    WCHAR values[4][STRINGLENTH];
     LPWSTR context;
     int i = 0;
 
@@ -355,10 +351,6 @@ int getOSInfo(SYSINFO *_sysinfo)
     (*_sysinfo).OS_LastBootUpTime = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(WCHAR) * STRINGLENTH);
     wcstok_s(values[i++], L"=", &context);
     wcscpy_s((*_sysinfo).OS_LastBootUpTime, STRINGLENTH, wcstok_s(NULL, L"=", &context));
-
-    (*_sysinfo).OS_MUILanguages = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(WCHAR) * STRINGLENTH);
-    wcstok_s(values[i++], L"=", &context);
-    wcscpy_s((*_sysinfo).OS_MUILanguages, STRINGLENTH, wcstok_s(NULL, L"=", &context));
     
     (*_sysinfo).OS_OSArchitecture = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(WCHAR) * STRINGLENTH);
     wcstok_s(values[i++], L"=", &context);

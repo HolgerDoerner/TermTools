@@ -33,7 +33,7 @@
  * GitHub: https://GitHub.com/HolgerDoerner/TermTools
  */
 
-#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS // to get rid of warning about _wfreopen()...
 
 #pragma comment(lib, "user32.lib")
 #pragma comment(lib, "advapi32.lib")
@@ -50,9 +50,9 @@
     #define PDC_WIDE
 #endif // PDC_WIDE
 
-#ifndef PDC_FORCE_UTF8
-    #define PDC_FORCE_UTF8
-#endif // PDC_FORCE_UTF8
+#ifndef PDC_UTF8
+    #define PDC_UTF8
+#endif // PDC_UTF8
 
 #include <curses.h>
 
@@ -87,7 +87,7 @@ void help(void);
 
 int wmain(int argc, LPWSTR *argv)
 {
-    setlocale(LC_ALL, "");
+    setUnicodeLocale(); 
 
     SETTINGS settings = {
         .lineCount = 0,
@@ -113,8 +113,7 @@ int wmain(int argc, LPWSTR *argv)
             settings.fileName = settings.filePath;
         }
 
-        pFile = _wfopen(settings.filePath, L"r");
-        if (!pFile)
+        if (_wfopen_s(&pFile, settings.filePath, L"r"))
         {
             _wperror(L"* ERROR");
         }
@@ -299,7 +298,7 @@ long fillScreenBuffer(SETTINGS *_settings, FILE **_pFile)
 
         // storing the linenumber within the string
         // sneaky, sneaky...
-        int ret = _snwprintf((*_settings).screenBuff[(*_settings).sbLines++], BUFSIZ-1, L"%7ld: %s", _settings->sbLines, inBuf);
+        int ret = _snwprintf_s((*_settings).screenBuff[(*_settings).sbLines++], BUFSIZ, BUFSIZ-1, L"%7ld: %s", _settings->sbLines, inBuf);
 
         if (feof(*_pFile)) break;
 

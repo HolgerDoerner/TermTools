@@ -44,6 +44,8 @@ void printHelp(void);
 
 int wmain(int argc, LPWSTR *argv)
 {
+    setUnicodeLocale();
+    
     parseArgs(argc, argv);
 
     LARGE_INTEGER start, end, diff;
