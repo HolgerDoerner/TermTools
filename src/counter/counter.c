@@ -46,7 +46,7 @@ void usage(void);
 int wmain(int argc, LPWSTR *argv)
 {
     setUnicodeLocale();
-    
+
     if (argc == 1)
     {
         usage();
@@ -135,7 +135,8 @@ SIZE_T count(LPCWSTR fileName, short mode)
     {
         if (isStringBlankW(buffer, BUFSIZ)) continue;
 
-        if (mode == CWORDS)
+        if (mode == CLINES) ++counter;
+        else //if (mode == CWORDS)
         {
             tok = wcstok_s(buffer, delimeter, &context);
 
@@ -146,7 +147,7 @@ SIZE_T count(LPCWSTR fileName, short mode)
             }
         }
 
-        if (mode == CLINES) ++counter;
+
 
         if (feof(pFile)) break;
     }
