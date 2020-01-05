@@ -70,7 +70,7 @@ void printHelp(void);
 
 int wmain(int argc, LPWSTR *argv)
 {
-    setlocale(LC_ALL, "");
+    setUnicodeLocale();
 
     SETTINGS settings = {
         .hAlg = NULL,

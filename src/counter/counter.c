@@ -45,6 +45,8 @@ void usage(void);
 
 int wmain(int argc, LPWSTR *argv)
 {
+    setUnicodeLocale();
+    
     if (argc == 1)
     {
         usage();
