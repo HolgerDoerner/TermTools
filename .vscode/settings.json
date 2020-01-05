@@ -6,5 +6,6 @@
         "*.c": "c",
         "*.h": "c",
         "*.in": "cpp"
-    }
+    },
+    "cSpell.enabled": false
 }
