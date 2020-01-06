@@ -303,10 +303,9 @@ void printOutput(SYSINFO *_sysinfo)
 	wprintf_s(L"\x1b[36m                                 111\x1b[0m %10s  %s", L"", _sysinfo->GPU_VideoModeDescription);
 	wprintf_s(L"                                     \x1b[33m%10s:\x1b[0m %s\n", L"Uptime", calculateUptime(_sysinfo));
     wprintf_s(L"\n");
-	wprintf_s(L" \x1b[7m TERMTOOLS: %hs - WINFETCH: %hs \x1b[0m\n", TT_VERSION, WINFETCH_VERSION);
 
     // keep printing empty lines to fill exactly the terminal window
-    for (int i = 26; i < _sysinfo->term_rows; ++i)
+    for (int i = 25; i < _sysinfo->term_rows; ++i)
         wprintf(L"\n");
 }
 

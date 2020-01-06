@@ -78,14 +78,9 @@ void setUnicodeLocale()
 
     if(pbTmp && _wcsicmp(pbTmp, L"C") != 0)
     {
-        LPWSTR pbLocaleUnicode = NULL;
-        SIZE_T cbLocaleUnicode = (sizeof(WCHAR) * wcslen(pbTmp)) + 7;
-
-        pbLocaleUnicode = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, cbLocaleUnicode);
-        _snwprintf_s(pbLocaleUnicode, cbLocaleUnicode, cbLocaleUnicode-1, L"%s.UTF-8", pbTmp);
-
+        WCHAR pbLocaleUnicode[256] = {0};
+        _snwprintf_s(pbLocaleUnicode, 256, 255, L"%s.UTF-8", pbTmp);
         _wsetlocale(LC_ALL, pbLocaleUnicode);
-        HeapFree(GetProcessHeap(), 0, pbLocaleUnicode);
     }
     else
     {
