@@ -21,7 +21,7 @@ This collection of tools for the Windows Command-Line is a small side-/hobby-pro
 
 Also those tools are not meant to be clones or re-implementations of other well-known applications, mostly from the Linux-World, but they are of course highly inspired by them. The implementations are as simple as possible, no fancy stuff if not ABSOLUTLY needed. Just no-nonsense get-the-job-done stuff...
 
-***Further Notes:*** I target the more recent versions of Windows 10 and Windows Server, and I don't test on older ones. So, if You really need dem to run on Windows XP or similar and they dont't, open a ticket and I will see what I can do for You 😉.
+***Further Notes:*** I target the more recent versions of Windows 10 and Windows Server, and I don't test on older ones. So, if You really need dem to run on Windows XP or similar and they dont't, open a ticket and I will see what I can do for You.
 
 # Included Tools
 NAME | DESCRIPTION

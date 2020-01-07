@@ -1,0 +1,9 @@
+#ifndef _FPEEK_VERSION_H
+#define _FPEEK_VERSION_H
+
+#define FPEEK_VERSION       "0.1.0"
+#define FPEEK_VERSION_MAJOR "0"
+#define FPEEK_VERSION_MINOR "1"
+#define FPEEK_VERSION_PATCH "0"
+
+#endif // _FPEEK_VERSION_H

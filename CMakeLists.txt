@@ -70,7 +70,8 @@ set(TARGET_LIST pager
                 counter
                 winfetch
                 timer
-                hashsum)
+                hashsum
+                fpeek)
 
 foreach(target ${TARGET_LIST})
     add_subdirectory(src/${target})
