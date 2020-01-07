@@ -7,5 +7,6 @@
         "*.h": "c",
         "*.in": "cpp"
     },
-    "cSpell.enabled": false
+    "cSpell.enabled": false,
+    "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools"
 }
