@@ -41,7 +41,7 @@
 
 typedef struct SETTINGS {
     int mode;
-    SIZE_T cLines;
+    int cLines;
     LPWSTR pbFileName;
 } SETTINGS;
 
@@ -60,12 +60,10 @@ int wmain(int argc, LPWSTR *argv)
 
     parseArgs(&settings, argc, argv);
 
-    FILE *file;
-    _wfopen_s(&file, settings.pbFileName, L"r");
+    FILE *pFile;
+    _wfopen_s(&pFile, settings.pbFileName, L"r");
 
-    WCHAR lines[10][1024] = {0};
-
-    SIZE_T cbLine = sizeof(WCHAR) * 512 * 2;
+    SIZE_T cbLine = sizeof(WCHAR) * 1024;
     SIZE_T cvLines = sizeof(LPWSTR) * settings.cLines;
     LPWSTR *pvLines = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, cvLines);
     if (!pvLines)
@@ -74,7 +72,9 @@ int wmain(int argc, LPWSTR *argv)
         exit(EXIT_FAILURE);
     }
 
-    for (int i = 0; i < (settings.mode ? settings.cLines : 1); ++i)
+    int cBufferMaxLines = (settings.mode == PEEK_BOTTOM ? settings.cLines : 1);
+
+    for (int i = 0; i < cBufferMaxLines; ++i)
     {
         pvLines[i] = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, cbLine);
         if (!pvLines[i])
@@ -86,7 +86,7 @@ int wmain(int argc, LPWSTR *argv)
 
     int vectorCounter = 0, lineCounter = 0;
 
-    while (fgetws(pvLines[vectorCounter], 1023, file))
+    while (fgetws(pvLines[vectorCounter], (int)cbLine-1, pFile))
     {
         if (settings.mode == PEEK_BOTTOM)
         {
@@ -97,15 +97,15 @@ int wmain(int argc, LPWSTR *argv)
         else
         {
             wprintf_s(L"%s", pvLines[vectorCounter]);
-            if (lineCounter >= settings.cLines) break;
+            if (lineCounter >= settings.cLines-1) break;
         }
         
         ++lineCounter;
 
-        if (feof(file)) break;
+        if (feof(pFile)) break;
     }
 
-    fclose(file);
+    fclose(pFile);
 
     if (settings.mode == PEEK_BOTTOM)
     {
@@ -157,7 +157,7 @@ void parseArgs(SETTINGS *_settings, int _argc, LPWSTR *_argv)
 
                 if (tok)
                 {
-                    (*_settings).cLines = _wcstoi64(tok, (LPWSTR *)NULL, 10);
+                    (*_settings).cLines = (int)wcstol(tok, (LPWSTR *)NULL, 10);
                 }
                 else
                 {
